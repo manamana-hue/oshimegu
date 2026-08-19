@@ -1165,7 +1165,7 @@ const WAIT_CHOICES = [30, 60, 360, 720, 1440];
 const waitLabel = m => m < 60 ? `${m}分` : `${m / 60}時間`;
 const SCHEMA_VERSION = 2;
 /** 更新できたか目視で確かめるための版数。sw.js の VERSION と揃える */
-const APP_VERSION = "v5";
+const APP_VERSION = "v6";
 const LS_SETTINGS = "oshimegu.settings";
 
 /**
@@ -2915,17 +2915,48 @@ function registerSW(){
   }).catch(()=>{});
 }
 
+/**
+ * 新しい版への切り替え。
+ * 以前は controllerchange が来るのを待つだけだったので、
+ * それが来ない環境では押しても何も起きなかった。
+ * 押したら必ず結果が出るように、次の3段構えにする。
+ *   1. 押されたことを画面で示す
+ *   2. 待機中のSWに切り替えを頼む
+ *   3. 一定時間で切り替わらなければ、自分で読み直す
+ * 画面遷移はネットワーク優先なので、3だけでも新しい本体が読み込まれる。
+ */
 function showUpdateBar(sw){
   if ($("#update-bar")) return;
+  // 直前に更新を押していれば、本体はすでに読み直されている。
+  // 切り替えの合図が来ない環境で、通知が出続けるのを避ける
+  try { if (sessionStorage.getItem("oshimegu.justUpdated")) return; } catch(_){}
   const bar = document.createElement("div");
   bar.id = "update-bar";
   bar.innerHTML = `<span class="grow">新しい版があります</span>
-    <button class="chip sm" id="btn-update">更新する</button>`;
+    <button class="chip sm" id="btn-update">更新する</button>
+    <button class="iconbtn" id="btn-update-later" aria-label="あとで">✕</button>`;
   document.body.appendChild(bar);
+
+  let done = false;
+  const reload = () => {
+    if (done) return;
+    done = true;
+    try { sessionStorage.setItem("oshimegu.justUpdated", "1"); } catch(_){}
+    // キャッシュを避けて読み直す
+    location.replace(location.pathname + location.search);
+  };
+
   $("#btn-update").addEventListener("click", () => {
-    sw.postMessage("skipWaiting");
-    navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), { once:true });
+    const btn = $("#btn-update");
+    btn.disabled = true;
+    btn.textContent = "更新中…";
+    navigator.serviceWorker.addEventListener("controllerchange", reload, { once: true });
+    try { if (sw) sw.postMessage("skipWaiting"); } catch(_){}
+    // 切り替えの合図が来ない環境でも、確実に新しい版へ進む
+    setTimeout(reload, 1500);
   });
+
+  $("#btn-update-later").addEventListener("click", () => bar.remove());
 }
 
 /* ---------- テーマ ---------- */
