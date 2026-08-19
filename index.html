@@ -1172,7 +1172,7 @@ const WAIT_CHOICES = [30, 60, 360, 720, 1440];
 const waitLabel = m => m < 60 ? `${m}分` : `${m / 60}時間`;
 const SCHEMA_VERSION = 2;
 /** 更新できたか目視で確かめるための版数。sw.js の VERSION と揃える */
-const APP_VERSION = "v8";
+const APP_VERSION = "v9";
 const LS_SETTINGS = "oshimegu.settings";
 
 /**
@@ -1715,7 +1715,7 @@ function renderLog(){
       html += `<button class="fold" data-year="${y}" aria-expanded="${yOpen}">
           <span class="caret" aria-hidden="true"></span>
           <span class="grow" style="font-weight:700">${Number(y)}年</span>
-          <span class="tiny" style="flex:none">${ms.length}か月 ・ ${cnt}件</span>
+          <span class="tiny" style="flex:none">${ms.length}か月 ・ ${cnt}の行動</span>
         </button>`;
       if (!yOpen) continue;
       html += `<div class="fold-body">`;
@@ -1726,7 +1726,7 @@ function renderLog(){
         html += `<button class="fold sub" data-month="${m}" aria-expanded="${mOpen}">
             <span class="caret" aria-hidden="true"></span>
             <span class="grow">${Number(m.slice(5))}月</span>
-            <span class="tiny" style="flex:none">${arr.length}件${memos ? ` ・ ことば${memos}` : ""}</span>
+            <span class="tiny" style="flex:none">${arr.length}の行動${memos ? ` ・ ${memos}のことば` : ""}</span>
           </button>`;
         if (!mOpen) continue;
         html += `<div style="padding:0 0 var(--sp-3)">
@@ -1965,9 +1965,17 @@ function applyEvState(){
   $("#ev-paid-field").hidden     = evState !== "paid";
   $$("#ev-state .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.state === evState)));
   if (evState === "saving"){
-    const pool = State.calc ? State.calc.balance : 0;
-    $("#ev-prepared-help").textContent =
-      `いま自由に使えるお金（${yen(pool)}）から、この予定に取り分けます。`;
+    // 手順の途中では State がまだ無いので、入力済みの引き継ぎ額から見る
+    const inOb = $("#sheet-event").dataset.ob === "1";
+    const pool = inOb
+      ? Math.max(0, (Number(toNumeric($("#ob-pool").value)) || 0)
+                    - obEvents.filter(e => e.state === "saving").reduce((a,b) => a + (b.prepared||0), 0))
+      : (State.calc ? State.calc.balance : 0);
+    $("#ev-prepared-help").textContent = pool > 0
+      ? `いま取り分けられるお金（${yen(pool)}）から、この予定に回します。`
+      : (inOb
+          ? "取り分けられるお金がまだ無いので、この金額は「すでに払った・貯めてある分」としてだけ記録します。"
+          : "いま取り分けられるお金がないため、この分は記録として残すだけになります。");
   }
 }
 
@@ -2663,6 +2671,9 @@ let obSkipFirst = false, obEvents = [];
 /** 手順の中で登録する「すでに決まっている予定」 */
 function renderObEvents(){
   const host = $("#ob-events");
+  // 予定を入れたあとに「今はない」を残すと、同じ意味の出口が2つ並んでしまう
+  const none = $('.ob-step[data-step="4"] .btn.quiet');
+  if (none) none.hidden = obEvents.length > 0;
   if (!obEvents.length){
     host.innerHTML = `<div class="notice">まだ登録されていません。</div>`; return;
   }
@@ -2709,7 +2720,15 @@ function obCollectEvent(){
   let prepared = 0;
   if (evState === "saving"){
     prepared = Number(toNumeric($("#ev-prepared").value));
+    // 引き継ぎ額より多く取り分けると、どこからも出ていないお金が生まれる
+    const pool = Number(toNumeric($("#ob-pool").value)) || 0;
+    const used = obEvents.filter(e => e.state === "saving").reduce((a,b) => a + (b.prepared||0), 0);
+    const left = Math.max(0, pool - used);
     if (!prepared || prepared > amount) set("ev-prepared-err", "必要な金額の範囲で入れてください。");
+    else if (prepared > left) set("ev-prepared-err",
+      left > 0
+        ? `いま取り分けられるのは ${yen(left)} までです。前の手順で、取り分けてある金額を増やせます。`
+        : "前の手順で「すでに取り分けてあるお金」を入れると、ここから取り分けられます。");
   }
   if (!ok) return;
   obEvents.push({ title, kind: evKind, targetAmount: amount, dueDate: date,
