@@ -1,0 +1,17 @@
+{
+  "name": "おしめぐ",
+  "short_name": "おしめぐ",
+  "description": "推しへの想いはそのままに、お金の流れだけ、整える。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7FC",
+  "theme_color": "#8B5FBF",
+  "lang": "ja",
+  "icons": [
+    { "src": "brand/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "brand/app-icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "brand/maskable-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

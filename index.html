@@ -1,0 +1,3139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8B5FBF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E1626" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="おしめぐ">
+<meta name="description" content="推しへの想いはそのままに、お金の流れだけ、整える。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%2210%22%20y1%3D%2210%22%20x2%3D%2290%22%20y2%3D%2290%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%238B5FBF%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23EE96BE%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M64.37%2019.19%20A34%2034%200%201%201%2035.63%2019.19%22%20fill%3D%22none%22%20stroke%3D%22url%28%23g%29%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2216%22%20r%3D%229.5%22%20fill%3D%22%23EE96BE%22%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="brand/app-icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>おしめぐ</title>
+<style>
+/* ============================================================
+   おしめぐ / Design Tokens
+   - 赤は残高・超過表示に使用しない（設計原則5）
+   - 数字は等幅・落ち着いた色
+   ============================================================ */
+/* ブランドガイド（2026-08-18）のトークンを適用。
+   実測コントラスト：本文14.34:1 / 金額7.69:1 / primary-deep 6.87:1
+   accent（ピンク）と positive（緑）は文字に使わず、塗り・アイコンのみ。 */
+:root{
+  --c-primary:#8B5FBF;        /* 塗り・アクセント。白背景の文字は可(4.68:1) */
+  --c-primary-deep:#6B4A98;   /* ティント背景上の文字はこちら(5.76:1) */
+  --c-primary-ink:#ffffff;
+  --c-primary-weak:#F0E8F8;
+  --c-accent:#EE96BE;         /* 塗り専用。文字には使わない(2.16:1) */
+  --c-bg:#FAF7FC;
+  --c-surface:#FFFFFF;
+  --c-surface-2:#F4EEF9;
+  --c-text:#2B2233;
+  --c-muted:#6A5F78;
+  --c-num:#5B4B7A;
+  --c-positive:#5C8F6E;       /* アイコン・塗り専用。本文には使わない(3.74:1) */
+  --c-line:#E7DEF0;
+  --r-s:8px; --r-m:14px; --r-l:20px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+  --tap:44px;
+  /* 端末の時計などと重ならないよう、セーフエリアに加えて余白を確保する */
+  --top-pad:calc(env(safe-area-inset-top, 0px) + 22px);
+  --nav-h:60px;
+  --maxw:480px;
+  --shadow:0 1px 3px rgba(40,35,50,.08), 0 6px 20px rgba(40,35,50,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --c-primary:#C4A5E8; --c-primary-deep:#C4A5E8; --c-primary-ink:#241C33;
+    --c-primary-weak:#332742; --c-accent:#EE96BE;
+    --c-bg:#1E1626; --c-surface:#281E33; --c-surface-2:#332742;
+    --c-text:#F4EFF8; --c-muted:#ADA0BE; --c-num:#C9B8E0; --c-positive:#7CC4A2;
+    --c-line:#3B2E4B; --shadow:none;
+  }
+}
+html[data-theme="light"]{
+  --c-primary:#8B5FBF; --c-primary-deep:#6B4A98; --c-primary-ink:#fff;
+  --c-primary-weak:#F0E8F8; --c-accent:#EE96BE;
+  --c-bg:#FAF7FC; --c-surface:#FFF; --c-surface-2:#F4EEF9; --c-text:#2B2233;
+  --c-muted:#6A5F78; --c-num:#5B4B7A; --c-positive:#5C8F6E; --c-line:#E7DEF0;
+  --shadow:0 1px 3px rgba(43,34,51,.07), 0 6px 20px rgba(43,34,51,.05);
+}
+html[data-theme="dark"]{
+  --c-primary:#C4A5E8; --c-primary-deep:#C4A5E8; --c-primary-ink:#241C33;
+  --c-primary-weak:#332742; --c-accent:#EE96BE;
+  --c-bg:#1E1626; --c-surface:#281E33; --c-surface-2:#332742; --c-text:#F4EFF8;
+  --c-muted:#ADA0BE; --c-num:#C9B8E0; --c-positive:#7CC4A2; --c-line:#3B2E4B; --shadow:none;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+/* display を持つクラス（.btn 等）が [hidden] を打ち消さないようにする */
+[hidden]{display:none !important;}
+html,body{margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  background:var(--c-bg); color:var(--c-text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px; line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* Flexの中でテキストがはみ出す最頻出原因を潰す */
+.row,.col,.card,.list-item{min-width:0;}
+.num{font-variant-numeric:tabular-nums; color:var(--c-num);}
+.wrap-any{overflow-wrap:anywhere; word-break:normal;}
+/* 一覧ではメモを2行に抑える（全文は詳細で読む） */
+.clamp2{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+  line-clamp:2; overflow:hidden; overflow-wrap:anywhere;}
+
+button,input,select,textarea{font:inherit; color:inherit;}
+button{cursor:pointer; background:none; border:none; padding:0;}
+:focus-visible{outline:3px solid var(--c-accent); outline-offset:2px; border-radius:4px;}
+
+/* ---------- App shell ---------- */
+#app{max-width:var(--maxw); margin:0 auto; min-height:100dvh; position:relative;}
+.screen{display:none; padding:0 var(--sp-4);
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--sp-6));}
+.screen.active{display:block;}
+
+.appbar{
+  position:sticky; top:0; z-index:20; background:var(--c-bg);
+  padding-top:var(--top-pad);
+  padding-bottom:var(--sp-2);
+  display:flex; align-items:center; gap:var(--sp-2);
+}
+.appbar h1{font-size:17px; font-weight:700; margin:0; flex:1; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.02em;}
+/* ブランドマーク：開いた円＋粒。周囲にマーク高さの半分以上の余白を取る */
+.brandmark{flex:none; width:24px; height:24px; display:block; margin-right:2px;}
+.brandmark svg{width:100%; height:100%; display:block;}
+.brandmark.lg{width:56px; height:56px; margin:0 0 var(--sp-4);}
+.iconbtn{min-width:var(--tap); min-height:var(--tap); display:grid; place-items:center;
+  border-radius:50%; color:var(--c-muted); font-size:20px;}
+.iconbtn:active{background:var(--c-surface-2);}
+
+/* ---------- Bottom nav ---------- */
+.nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:30;
+  max-width:var(--maxw); margin:0 auto;
+  background:var(--c-surface); border-top:1px solid var(--c-line);
+  padding-bottom:env(safe-area-inset-bottom);
+  display:grid; grid-template-columns:repeat(5,1fr);
+}
+.nav button{
+  min-height:var(--nav-h); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2px;
+  color:var(--c-muted); font-size:10px; letter-spacing:.02em;
+}
+.nav button .ic{font-size:19px; line-height:1;}
+.nav button[aria-current="page"]{color:var(--c-primary-deep); font-weight:700;}
+.nav button{position:relative;}
+.nav .dot{position:absolute; top:11px; left:calc(50% + 9px);
+  width:7px; height:7px; border-radius:50%; background:var(--c-accent);}
+.nav .fab-slot{position:relative;}
+.fab{
+  position:absolute; left:50%; top:-14px; transform:translateX(-50%);
+  width:54px; height:54px; border-radius:50%;
+  background:var(--c-primary); color:var(--c-primary-ink);
+  font-size:0; /* グリフに依存せず＋を描く */
+  box-shadow:0 4px 14px rgba(139,95,191,.35);
+}
+.fab::before,.fab::after{content:""; position:absolute; top:50%; left:50%;
+  background:var(--c-primary-ink); border-radius:2px;}
+.fab::before{width:22px; height:2.5px; transform:translate(-50%,-50%);}
+.fab::after {width:2.5px; height:22px; transform:translate(-50%,-50%);}
+.fab:active{transform:translateX(-50%) scale(.95);}
+
+/* ---------- Cards & type ---------- */
+.card{background:var(--c-surface); border-radius:var(--r-m); padding:var(--sp-4);
+  box-shadow:var(--shadow); margin-bottom:var(--sp-3);}
+.card.flat{box-shadow:none; border:1px solid var(--c-line);}
+.sec-title{font-size:13px; font-weight:700; color:var(--c-muted);
+  margin:var(--sp-5) 0 var(--sp-2); letter-spacing:.04em;}
+.muted{color:var(--c-muted); font-size:13px;}
+.tiny{font-size:12px; color:var(--c-muted);}
+.row{display:flex; align-items:center; gap:var(--sp-3);}
+.row.between{justify-content:space-between;}
+.col{display:flex; flex-direction:column;}
+.grow{flex:1; min-width:0;}
+.trunc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+/* ---------- Hero (今使っていい金額) ---------- */
+.hero{background:var(--c-surface); border-radius:var(--r-l); padding:var(--sp-5) var(--sp-4);
+  box-shadow:var(--shadow); text-align:center; margin-bottom:var(--sp-3);}
+.hero .label{font-size:13px; color:var(--c-muted); font-weight:600;}
+.hero .amount{font-size:clamp(30px,10vw,40px); font-weight:700; line-height:1.25;
+  margin:var(--sp-1) 0 0; letter-spacing:-.01em;}
+.hero .note{font-size:13px; color:var(--c-muted); margin-top:var(--sp-2); line-height:1.6;}
+
+/* ---------- Progress ---------- */
+.bar{height:8px; border-radius:99px; background:var(--c-surface-2); overflow:hidden;}
+.bar > i{display:block; height:100%; border-radius:99px; background:var(--c-primary);
+  transition:width .25s ease;}
+.bar.thin{height:6px;}
+
+/* ---------- Chips ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:var(--sp-2);}
+.chip{border:1px solid var(--c-line); background:var(--c-surface);
+  border-radius:99px; padding:9px 14px; font-size:14px; min-height:var(--tap);
+  display:inline-flex; align-items:center; color:var(--c-text);}
+.chip[aria-pressed="true"]{background:var(--c-primary-weak); border-color:var(--c-primary);
+  color:var(--c-primary-deep); font-weight:700;}
+/* 小さめのチップも、指で押す当たり判定は他と同じだけ確保する */
+.chip.sm{min-height:var(--tap); padding:6px 14px; font-size:13px;}
+.axis-chip{background:var(--c-primary-weak); color:var(--c-primary-deep); border:none;
+  border-radius:99px; padding:3px 10px; font-size:12px; font-weight:600;}
+
+/* ---------- Buttons ---------- */
+.btn{display:flex; align-items:center; justify-content:center; gap:6px;
+  min-height:50px; padding:0 var(--sp-4); border-radius:var(--r-m);
+  font-size:16px; font-weight:700; width:100%; text-align:center;}
+.btn.primary{background:var(--c-primary); color:var(--c-primary-ink);}
+.btn.ghost{background:var(--c-surface); color:var(--c-text); border:1px solid var(--c-line);}
+.btn.quiet{background:none; color:var(--c-muted); font-weight:600; min-height:var(--tap);}
+.btn:active{opacity:.85;}
+.btn[disabled]{opacity:.4; pointer-events:none;}
+.btn-row{display:flex; gap:var(--sp-3);}
+.btn-row .btn{flex:1;}
+
+/* ---------- Forms ---------- */
+.field{margin-bottom:var(--sp-4);}
+.field > label{display:block; font-size:13px; font-weight:700; color:var(--c-muted);
+  margin-bottom:6px;}
+.input,.select,.textarea{
+  width:100%; background:var(--c-surface); border:1px solid var(--c-line);
+  border-radius:var(--r-s); padding:12px 14px;
+  font-size:16px; /* iOSの自動ズーム防止のため16px未満にしない */
+  min-height:var(--tap); color:var(--c-text);
+}
+.textarea{resize:none; line-height:1.6; min-height:76px;}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--c-primary); outline:none;
+  box-shadow:0 0 0 3px var(--c-primary-weak);}
+.input.amount{font-size:24px; font-weight:700; text-align:right;
+  font-variant-numeric:tabular-nums; padding-right:44px;}
+/* 未入力の「0」が入力済みに見えないよう薄くする */
+.input::placeholder,.textarea::placeholder{color:var(--c-muted); opacity:.55; font-weight:400;}
+.amount-wrap{position:relative;}
+.amount-wrap::after{content:"円"; position:absolute; right:14px; top:50%;
+  transform:translateY(-50%); color:var(--c-muted); font-size:14px; pointer-events:none;}
+.select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--c-muted) 50%),
+  linear-gradient(135deg,var(--c-muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size:5px 5px, 5px 5px; background-repeat:no-repeat; padding-right:38px;}
+.err{color:var(--c-primary-deep); font-size:13px; margin-top:4px; font-weight:600;}
+.help{font-size:12px; color:var(--c-muted); margin-top:5px; line-height:1.55;}
+
+input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
+  background:transparent;}
+
+/* 入力欄の右に添えるボタン（リンクを開く等） */
+.input-row{display:flex; gap:var(--sp-2); align-items:stretch;}
+.input-row .input{flex:1; min-width:0;}
+.sidebtn{flex:none; width:var(--tap); min-height:var(--tap);
+  border:1px solid var(--c-line); border-radius:var(--r-s);
+  background:var(--c-surface); color:var(--c-primary-deep);
+  display:grid; place-items:center; font-size:18px; line-height:1;}
+.sidebtn:active{background:var(--c-surface-2);}
+.sidebtn[disabled]{opacity:.35; pointer-events:none;}
+
+/* ---------- List ---------- */
+.list{background:var(--c-surface); border-radius:var(--r-m); overflow:hidden;
+  box-shadow:var(--shadow);}
+.list-item{display:flex; align-items:center; gap:var(--sp-3); width:100%;
+  padding:var(--sp-3) var(--sp-4); min-height:var(--tap); text-align:left;
+  border-bottom:1px solid var(--c-line);}
+.list-item:last-child{border-bottom:none;}
+.list-item:active{background:var(--c-surface-2);}
+.list-item .ic{width:34px; height:34px; flex:none; border-radius:50%;
+  background:var(--c-primary-weak); display:grid; place-items:center; font-size:16px;}
+.list-item .amt{flex:none; font-weight:700; font-variant-numeric:tabular-nums; font-size:15px;}
+
+/* ---------- 折りたたみ ---------- */
+.fold{display:flex; align-items:center; gap:var(--sp-3); width:100%;
+  min-height:var(--tap); padding:var(--sp-3) var(--sp-4); text-align:left;
+  background:var(--c-surface); border:1px solid var(--c-line); border-radius:var(--r-m);
+  margin-bottom:var(--sp-2); color:var(--c-text); font-size:15px;}
+.fold:active{background:var(--c-surface-2);}
+.fold.sub{background:none; border:none; border-bottom:1px solid var(--c-line);
+  border-radius:0; margin-bottom:0; padding-left:var(--sp-2);}
+.fold-body{padding-left:var(--sp-3); border-left:2px solid var(--c-line);
+  margin:0 0 var(--sp-3) var(--sp-2);}
+.caret{flex:none; width:10px; height:10px; border-right:2px solid var(--c-muted);
+  border-bottom:2px solid var(--c-muted); transform:rotate(-45deg); margin-left:2px;
+  transition:transform .18s;}
+[aria-expanded="true"] > .caret{transform:rotate(45deg); margin-top:-4px;}
+
+.empty{text-align:center; padding:var(--sp-6) var(--sp-4); color:var(--c-muted);}
+.empty .big{font-size:30px; margin-bottom:var(--sp-2); opacity:.55;}
+.empty p{margin:0 0 var(--sp-1); font-size:14px; line-height:1.7;}
+
+/* ---------- Sheet (全画面モーダル) ---------- */
+.sheet{position:fixed; inset:0; z-index:100; display:none;
+  background:var(--c-bg); overflow-y:auto; -webkit-overflow-scrolling:touch;}
+.sheet.open{display:block;}
+.sheet-inner{max-width:var(--maxw); margin:0 auto; padding:0 var(--sp-4);
+  padding-bottom:calc(env(safe-area-inset-bottom) + 96px);}
+.sheet-bar{position:sticky; top:0; background:var(--c-bg); z-index:2;
+  padding-top:var(--top-pad); padding-bottom:var(--sp-2);
+  display:flex; align-items:center; gap:var(--sp-2);}
+.sheet-bar h2{font-size:17px; font-weight:700; margin:0; flex:1; min-width:0;
+  text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+/* 戻るボタンと同じ幅を右に置いて、見出しを画面の中央に揃える */
+.sheet-bar .spacer{flex:none; width:var(--tap); height:var(--tap);}
+/* 保存ボタンはキーボードに隠れないよう下部固定 */
+.sheet-foot{position:sticky; bottom:0; background:linear-gradient(transparent,var(--c-bg) 28%);
+  padding:var(--sp-4) 0 calc(env(safe-area-inset-bottom) + var(--sp-4));}
+
+/* ---------- Onboarding ---------- */
+#onboarding{position:fixed; inset:0; z-index:80; background:var(--c-bg);
+  overflow-y:auto; display:none;}
+#onboarding.open{display:block;}
+.ob-inner{max-width:var(--maxw); margin:0 auto; min-height:100dvh;
+  padding:calc(var(--top-pad) + var(--sp-2)) var(--sp-4)
+          calc(env(safe-area-inset-bottom) + var(--sp-5));
+  display:flex; flex-direction:column;}
+.ob-step{display:none; flex:1; flex-direction:column;}
+.ob-step.active{display:flex;}
+.ob-dots{display:flex; gap:6px; justify-content:center; margin-bottom:var(--sp-5);}
+.ob-dots i{width:7px; height:7px; border-radius:50%; background:var(--c-line);}
+.ob-dots i.on{background:var(--c-primary); width:20px; border-radius:99px;}
+.ob-title{font-size:22px; font-weight:700; line-height:1.5; margin:0 0 var(--sp-3);}
+.ob-lead{color:var(--c-muted); font-size:15px; line-height:1.8; margin:0 0 var(--sp-5);}
+.ob-foot{margin-top:auto; padding-top:var(--sp-5);}
+
+.alloc-row{display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-2);}
+.alloc-row .name{font-size:14px; font-weight:700;}
+.alloc-row .val{font-size:13px; color:var(--c-muted); font-variant-numeric:tabular-nums;}
+.alloc-amt{font-size:20px; font-weight:700; font-variant-numeric:tabular-nums;}
+
+.result-box{background:var(--c-primary-weak); border-radius:var(--r-m);
+  padding:var(--sp-4); text-align:center;}
+.result-box .k{font-size:13px; color:var(--c-primary-deep); font-weight:700;}
+.result-box .v{font-size:32px; font-weight:700; color:var(--c-primary-deep);
+  font-variant-numeric:tabular-nums; line-height:1.3;}
+
+/* ---------- Toast ---------- */
+#update-bar{position:fixed; left:50%; transform:translateX(-50%); z-index:110;
+  bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+  width:calc(100% - 32px); max-width:calc(var(--maxw) - 32px);
+  background:var(--c-surface); border:1px solid var(--c-line); border-radius:var(--r-m);
+  box-shadow:var(--shadow); padding:10px 12px;
+  display:flex; align-items:center; gap:var(--sp-2); font-size:14px;}
+#update-bar .grow{flex:1; min-width:0;}
+
+#toast{position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px); z-index:120;
+  background:var(--c-text); color:var(--c-bg); padding:11px 18px; border-radius:99px;
+  font-size:14px; font-weight:600; box-shadow:var(--shadow); max-width:calc(100% - 32px);
+  opacity:0; pointer-events:none; transition:opacity .2s;}
+#toast.show{opacity:1;}
+
+/* ---------- Notice ---------- */
+.notice{background:var(--c-surface-2); border-radius:var(--r-s); padding:var(--sp-3);
+  font-size:13px; color:var(--c-muted); line-height:1.7;}
+
+/* ---------- Switch ---------- */
+.switch{flex:none; width:46px; height:28px; border-radius:99px; background:var(--c-line);
+  position:relative; transition:background .18s;}
+.switch::after{content:""; position:absolute; top:3px; left:3px; width:22px; height:22px;
+  border-radius:50%; background:var(--c-surface); transition:transform .18s;
+  box-shadow:0 1px 3px rgba(43,34,51,.25);}
+[aria-pressed="true"] > .switch{background:var(--c-primary);}
+[aria-pressed="true"] > .switch::after{transform:translateX(18px);}
+
+/* 期首（はじめる前）の記録であることを示す小さな印 */
+.tag-open{display:inline-block; background:var(--c-surface-2); color:var(--c-muted);
+  border-radius:99px; padding:1px 7px; font-size:11px; font-weight:600; margin-left:6px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important; animation:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ ホーム ============ -->
+  <section class="screen" id="s-home">
+    <div class="appbar">
+      <span class="brandmark" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><defs>
+          <linearGradient id="flowGrad" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="var(--c-primary)"/><stop offset="1" stop-color="#EE96BE"/>
+          </linearGradient></defs>
+          <path d="M64.37 19.19 A34 34 0 1 1 35.63 19.19" fill="none"
+            stroke="url(#flowGrad)" stroke-width="14" stroke-linecap="round"/>
+          <circle cx="50" cy="16" r="9.5" fill="#EE96BE"/>
+        </svg>
+      </span>
+      <h1>おしめぐ</h1>
+      <button class="iconbtn" id="btn-theme" aria-label="表示テーマを切り替える">◐</button>
+      <button class="iconbtn" id="btn-settings" aria-label="設定">⚙</button>
+    </div>
+
+    <div id="axis-line" class="chips" style="margin-bottom:var(--sp-3)"></div>
+
+    <div class="hero">
+      <div class="label">今、使っていい金額</div>
+      <div class="amount num" id="hero-amount">¥0</div>
+      <div class="note" id="hero-note"></div>
+    </div>
+
+    <div class="card">
+      <div class="row between" style="margin-bottom:var(--sp-2)">
+        <span style="font-size:13px;font-weight:700;color:var(--c-muted)" id="budget-label">今月の推し活枠</span>
+        <span class="tiny num" id="budget-ratio"></span>
+      </div>
+      <div class="bar"><i id="budget-bar" style="width:0%"></i></div>
+      <div class="row between" style="margin-top:var(--sp-2)">
+        <span class="tiny">残り <b class="num" id="budget-left">¥0</b></span>
+        <span class="tiny">枠 <b class="num" id="budget-total">¥0</b></span>
+      </div>
+      <div class="row between" style="margin-top:var(--sp-3);padding-top:var(--sp-3);
+           border-top:1px solid var(--c-line)">
+        <span class="tiny">推し活に使えるお金（引き継ぎ分をふくむ）</span>
+        <b class="num" id="pool-now" style="font-size:15px">¥0</b>
+      </div>
+      <div class="row between" style="margin-top:6px">
+        <span class="tiny">今ある貯金</span>
+        <b class="num" id="savings-now" style="font-size:15px">¥0</b>
+      </div>
+    </div>
+
+    <div class="card" id="oshigoto-card">
+      <div class="row between" style="margin-bottom:var(--sp-3)">
+        <span style="font-size:13px;font-weight:700;color:var(--c-muted)">推し事貯金</span>
+        <span class="tiny num">これまで <b id="oshigoto-total">¥0</b></span>
+      </div>
+      <div class="chips" id="oshigoto-btns"></div>
+      <p class="help" style="margin-bottom:0">尊いと思った瞬間に、生活費から少しだけ貯金へ。</p>
+    </div>
+
+    <div class="sec-title">守っている未来</div>
+    <div id="home-events"></div>
+
+    <div class="sec-title">最近の記録</div>
+    <div id="home-recent"></div>
+  </section>
+
+  <!-- ============ 未来予定 ============ -->
+  <section class="screen" id="s-events">
+    <div class="appbar"><h1>未来の予定</h1>
+      <button class="iconbtn" id="btn-add-event" aria-label="予定を追加">＋</button>
+    </div>
+    <p class="muted" style="margin-top:0">先に確保しておきたい推し活を登録しておくと、「今使っていい金額」に反映されます。</p>
+    <div id="events-list"></div>
+  </section>
+
+  <!-- ============ ほしいBOX ============ -->
+  <section class="screen" id="s-wish">
+    <div class="appbar"><h1>ほしいBOX</h1>
+      <button class="iconbtn" id="btn-add-wish" aria-label="欲しいものを入れる">＋</button>
+    </div>
+    <p class="muted" style="margin-top:0">見つけたものを、いったんここに置いておけます。<span id="wish-wait-label"></span>後に、もう一度考えます。</p>
+    <div id="wish-list"></div>
+  </section>
+
+  <!-- ============ ログ ============ -->
+  <section class="screen" id="s-log">
+    <div class="appbar"><h1>推し活ログ</h1>
+      <button class="iconbtn" id="btn-add-note" aria-label="つぶやきを残す">✎</button>
+    </div>
+    <div class="chips" id="log-filter" style="margin-bottom:var(--sp-3)">
+      <button class="chip sm" data-f="all" aria-pressed="true">すべて</button>
+      <button class="chip sm" data-f="memo" aria-pressed="false">ひとことがある記録</button>
+      <button class="chip sm" data-f="expense" aria-pressed="false">使った</button>
+      <button class="chip sm" data-f="saved" aria-pressed="false">貯めた</button>
+      <button class="chip sm" data-f="passed" aria-pressed="false">見送った</button>
+    </div>
+    <input class="input" id="log-search" type="search" placeholder="ことばで探す"
+      style="margin-bottom:var(--sp-3)" autocomplete="off">
+    <div id="log-list"></div>
+  </section>
+
+  <!-- ============ 設定 ============ -->
+  <section class="screen" id="s-settings">
+    <div class="appbar">
+      <button class="iconbtn" id="btn-settings-back" aria-label="戻る">‹</button>
+      <h1>設定</h1>
+    </div>
+
+    <div class="sec-title">お金の配分</div>
+    <div class="card">
+      <div class="field" style="margin-bottom:var(--sp-3)">
+        <label for="set-income">月に使えるお金（手取りなど）</label>
+        <div class="amount-wrap">
+          <input class="input amount" id="set-income" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+        </div>
+      </div>
+      <div id="set-alloc"></div>
+      <button class="btn primary" id="btn-save-settings" style="margin-top:var(--sp-4)">保存する</button>
+    </div>
+
+    <div class="sec-title">手元にあるお金</div>
+    <div class="card">
+      <p class="help" style="margin-top:0">使いはじめたときに引き継いだ金額です。あとから直せます。</p>
+      <div class="field" style="margin-bottom:var(--sp-3)">
+        <label for="set-pool">推し活のために引き継いだ金額</label>
+        <div class="amount-wrap">
+          <input class="input amount" id="set-pool" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:var(--sp-3)">
+        <label for="set-savings">今ある貯金</label>
+        <div class="amount-wrap">
+          <input class="input amount" id="set-savings" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+        </div>
+      </div>
+      <p class="tiny" id="set-opening-note" style="margin:0 0 var(--sp-3)"></p>
+      <button class="btn primary" id="btn-save-opening">保存する</button>
+    </div>
+
+    <div class="sec-title">自分の軸</div>
+    <div class="card">
+      <div class="chips" id="set-axes"></div>
+      <p class="help">他の人と比べるためではなく、自分が迷ったときの基準にするためのものです。</p>
+    </div>
+
+    <div class="sec-title">待ち時間</div>
+    <div class="card">
+      <p class="help" style="margin-top:0">ほしいBOXに入れてから、もう一度考えるまでの時間です。</p>
+      <div class="chips" id="set-wait"></div>
+    </div>
+
+    <div class="sec-title">記録の持ち出し・控え</div>
+    <div class="card">
+      <p class="help" style="margin-top:0">
+        記録はこの端末の中だけにあります。端末を変えるときや、長く残しておきたいときは、控えを保存しておいてください。
+      </p>
+      <p class="tiny" id="backup-status" style="margin:var(--sp-3) 0"></p>
+      <button class="btn primary" id="btn-backup">控えを保存する（JSON）</button>
+      <div class="btn-row" style="margin-top:var(--sp-2)">
+        <button class="btn ghost" id="btn-csv">書き出す（CSV）</button>
+        <button class="btn ghost" id="btn-restore">控えから戻す</button>
+      </div>
+      <input type="file" id="file-restore" accept="application/json,.json" hidden>
+      <p class="help">CSVは表計算ソフトで開けます。控え（JSON）は、このアプリに戻すためのものです。</p>
+    </div>
+
+    <div class="sec-title">ホーム画面に置く</div>
+    <div class="card" id="install-card">
+      <p class="help" style="margin-top:0" id="install-lead"></p>
+      <button class="btn primary" id="btn-install" hidden>ホーム画面に追加する</button>
+      <div class="notice" id="install-steps" hidden></div>
+    </div>
+
+    <div class="sec-title">保存について</div>
+    <div class="card flat">
+      <p class="notice" id="storage-info">確認中…</p>
+      <div class="row between" style="margin-top:var(--sp-3)">
+        <span class="tiny" style="flex:none">記録の保護</span>
+        <b class="tiny" id="persist-state" style="text-align:right">確認中…</b>
+      </div>
+      <p class="help" id="persist-note" style="margin:4px 0 0"></p>
+      <div class="row between" style="margin-top:var(--sp-3)">
+        <span class="tiny" style="flex:none">使っている容量</span>
+        <b class="tiny num" id="quota-state">確認中…</b>
+      </div>
+      <div class="bar thin" style="margin-top:var(--sp-2)"><i id="quota-bar" style="width:0%"></i></div>
+      <p class="help" style="margin-top:var(--sp-3)">記録はこの端末の中だけに保存され、どこにも送信されません。</p>
+    </div>
+
+    <div class="sec-title">この試作版について</div>
+    <div class="card flat">
+      <p class="tiny" style="margin:0 0 var(--sp-2)">おしめぐ プロトタイプ 段階3</p>
+      <p class="tiny" style="margin:0">実装済み：先取り予算 ／ 未来の予定 ／ 支出の記録 ／ 今使っていい金額 ／
+      ほしいBOX ／ 推し事貯金 ／ 推し活ログ ／ 立て直しの提案 ／ 書き出しと控えの保存 ／
+      使いはじめる前からの引き継ぎ ／ ホーム画面への追加とオフライン動作 ／ 月末の振り返り<br>
+      次の段階：3年より前の記録のアーカイブ ／ 給料日を起点にした締め日の設定</p>
+      <button class="btn quiet" id="btn-open-recovery" style="margin-top:var(--sp-3)">立て直しの提案を見る</button>
+      <button class="btn quiet" id="btn-reset">最初からやり直す</button>
+    </div>
+  </section>
+
+  <!-- ============ ボトムナビ ============ -->
+  <nav class="nav" role="navigation">
+    <button data-go="home"><span class="ic">🏠</span>ホーム</button>
+    <button data-go="events"><span class="ic">📅</span>未来</button>
+    <div class="fab-slot"><button class="fab" id="btn-fab" aria-label="記録する"></button></div>
+    <button data-go="wish"><span class="ic">🎁</span>ほしい</button>
+    <button data-go="log"><span class="ic">📖</span>ログ</button>
+  </nav>
+</div>
+
+<!-- ============ 記録シート ============ -->
+<div class="sheet" id="sheet-txn" role="dialog" aria-modal="true" aria-labelledby="txn-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-txn" aria-label="戻る">‹</button>
+      <h2 id="txn-title">記録する</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+
+    <div class="chips" style="margin-bottom:var(--sp-4)" id="txn-type">
+      <button class="chip" data-type="expense" aria-pressed="true">使った</button>
+      <button class="chip" data-type="contribution" aria-pressed="false">未来へ積み立てた</button>
+      <button class="chip" data-type="saving" aria-pressed="false">貯金にまわした</button>
+    </div>
+    <!-- 保存後は種別を変えられない。あとから変えるとお金の流れが合わなくなるため -->
+    <div class="card flat" id="txn-type-fixed" hidden style="margin-bottom:var(--sp-4)">
+      <div class="row between" style="gap:var(--sp-3)">
+        <span class="tiny" style="flex:none">この記録は</span>
+        <b id="txn-type-label" style="font-size:15px"></b>
+      </div>
+      <p class="help" style="margin-bottom:0">
+        種類は後から変えられません。間違えていたら、削除してから記録し直してください。</p>
+    </div>
+
+    <div class="field">
+      <label for="txn-amount">金額</label>
+      <div class="amount-wrap">
+        <input class="input amount" id="txn-amount" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+      </div>
+      <div class="err" id="txn-amount-err" hidden></div>
+    </div>
+
+    <div class="field" id="txn-cat-field">
+      <label for="txn-category">なにに</label>
+      <select class="select" id="txn-category"></select>
+    </div>
+
+    <div class="field" id="txn-event-field">
+      <label for="txn-event">どの予定に</label>
+      <select class="select" id="txn-event"></select>
+      <div class="help" id="txn-event-help"></div>
+      <div class="err" id="txn-event-err" hidden></div>
+    </div>
+
+    <div class="field" id="txn-noevent-field" hidden>
+      <div class="notice">
+        まだ、積み立て先の予定がありません。<br>
+        行き先を決めずに貯めるなら「貯金にまわした」を選んでください。
+      </div>
+      <div class="btn-row" style="margin-top:var(--sp-3)">
+        <button class="btn ghost" id="btn-txn-to-saving">貯金にまわす</button>
+        <button class="btn ghost" id="btn-txn-new-event">予定を作る</button>
+      </div>
+    </div>
+
+    <div class="field" id="txn-saving-field" hidden>
+      <div class="notice" id="txn-saving-note"></div>
+    </div>
+
+    <div class="field">
+      <label for="txn-date">日付</label>
+      <input class="input" type="date" id="txn-date">
+    </div>
+
+    <div class="field">
+      <label for="txn-memo">ひとこと</label>
+      <textarea class="textarea" id="txn-memo" maxlength="200"
+        placeholder="一言、残しますか？（あとで読み返すためのものです）"></textarea>
+      <div class="help"><span id="txn-memo-count">0</span>/200　書かなくても保存できます。</div>
+    </div>
+
+    <div class="card flat" style="margin-bottom:0" id="txn-opening-card">
+      <button class="row between" id="txn-opening-toggle" aria-pressed="false"
+        style="width:100%;min-height:var(--tap);text-align:left;gap:var(--sp-3)">
+        <span class="grow col" style="gap:2px">
+          <span style="font-size:14px;font-weight:700">はじめる前のこと</span>
+          <span class="tiny">おしめぐを使う前の記録として残します</span>
+        </span>
+        <span class="switch" aria-hidden="true"></span>
+      </button>
+      <p class="help" style="margin-bottom:0">今ある金額は変わりません。すでに買ってあるチケットなどに使ってください。</p>
+    </div>
+
+    <div class="sheet-foot">
+      <button class="btn primary" id="btn-save-txn">保存する</button>
+      <button class="btn quiet" id="btn-delete-txn" hidden style="margin-top:var(--sp-2)">この記録を削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 予定シート ============ -->
+<div class="sheet" id="sheet-event" role="dialog" aria-modal="true" aria-labelledby="event-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-event" aria-label="戻る">‹</button>
+      <h2 id="event-title">未来の予定</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+
+    <div class="field">
+      <label for="ev-title">なんの予定</label>
+      <input class="input" id="ev-title" maxlength="30" placeholder="例：11月のライブ">
+      <div class="err" id="ev-title-err" hidden></div>
+    </div>
+
+    <div class="field">
+      <label>種類</label>
+      <div class="chips" id="ev-kind">
+        <button class="chip" data-kind="live" aria-pressed="true">🎤 ライブ</button>
+        <button class="chip" data-kind="travel" aria-pressed="false">🚄 遠征</button>
+        <button class="chip" data-kind="goods" aria-pressed="false">🧸 グッズ</button>
+        <button class="chip" data-kind="event" aria-pressed="false">🎫 イベント</button>
+        <button class="chip" data-kind="other" aria-pressed="false">✨ その他</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="ev-amount">必要な金額</label>
+      <div class="amount-wrap">
+        <input class="input amount" id="ev-amount" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+      </div>
+      <div class="err" id="ev-amount-err" hidden></div>
+    </div>
+
+    <div class="field">
+      <label for="ev-date">予定日</label>
+      <input class="input" type="date" id="ev-date">
+      <div class="err" id="ev-date-err" hidden></div>
+    </div>
+
+    <div id="ev-existing">
+      <div class="sec-title" style="margin-top:var(--sp-4)">この予定、もう動いていますか？</div>
+      <div class="card flat">
+        <div class="chips" id="ev-state">
+          <button class="chip sm" data-state="new"    aria-pressed="true">これから貯める</button>
+          <button class="chip sm" data-state="saving" aria-pressed="false">もう一部を用意してある</button>
+          <button class="chip sm" data-state="paid"   aria-pressed="false">支払いは済んでいる</button>
+        </div>
+
+        <div class="field" id="ev-prepared-field" style="margin:var(--sp-4) 0 0" hidden>
+          <label for="ev-prepared">すでに用意できている金額</label>
+          <div class="amount-wrap">
+            <input class="input amount" id="ev-prepared" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+          </div>
+          <div class="help" id="ev-prepared-help"></div>
+          <div class="err" id="ev-prepared-err" hidden></div>
+        </div>
+
+        <div class="field" id="ev-paid-field" style="margin:var(--sp-4) 0 0" hidden>
+          <label for="ev-paid-date">支払った日</label>
+          <input class="input" type="date" id="ev-paid-date">
+          <div class="help">記録として残るだけで、今ある金額は変わりません。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:var(--sp-4)">
+      <label for="ev-memo">メモ（任意）</label>
+      <textarea class="textarea" id="ev-memo" maxlength="200" placeholder="覚えておきたいこと"></textarea>
+    </div>
+
+    <div id="ev-progress" hidden>
+      <div class="sec-title" style="margin-top:var(--sp-4)">積み立ての状況</div>
+      <div class="card flat">
+        <div class="row between" style="margin-bottom:var(--sp-2)">
+          <span class="tiny">貯まっている</span>
+          <span class="num" style="font-weight:700" id="ev-saved">¥0</span>
+        </div>
+        <div class="bar"><i id="ev-bar" style="width:0%"></i></div>
+        <p class="help" id="ev-monthly"></p>
+      </div>
+    </div>
+
+    <div class="sheet-foot">
+      <button class="btn primary" id="btn-save-event">保存する</button>
+      <button class="btn quiet" id="btn-delete-event" hidden style="margin-top:var(--sp-2)">この予定をやめる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ほしいBOX：追加 ============ -->
+<div class="sheet" id="sheet-wish" role="dialog" aria-modal="true" aria-labelledby="wish-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-wish" aria-label="戻る">‹</button>
+      <h2 id="wish-title">ほしいBOXに入れる</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+    <p class="muted" style="margin-top:0">まだ買わなくて大丈夫です。ここに置いておくだけにしましょう。</p>
+
+    <div class="field">
+      <label for="wi-title">なにが欲しい？</label>
+      <input class="input" id="wi-title" maxlength="50" placeholder="例：新作のアクスタ">
+      <div class="err" id="wi-title-err" hidden></div>
+    </div>
+    <div class="field">
+      <label for="wi-amount">金額</label>
+      <div class="amount-wrap">
+        <input class="input amount" id="wi-amount" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+      </div>
+      <div class="err" id="wi-amount-err" hidden></div>
+    </div>
+    <div class="field">
+      <label for="wi-reason">なんで欲しいと思った？</label>
+      <textarea class="textarea" id="wi-reason" maxlength="200"
+        placeholder="今の気持ちのまま、書いてみてください。あとで自分が読みます。"></textarea>
+      <div class="help">書いておくと、あとで自分の気持ちを確かめやすくなります。</div>
+    </div>
+    <div class="field">
+      <label for="wi-url">リンク（任意）</label>
+      <div class="input-row">
+        <input class="input" id="wi-url" type="url" inputmode="url" placeholder="https://">
+        <button class="sidebtn" id="btn-wi-open" aria-label="リンクを開く" disabled>
+          <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+      <div class="help">保存しておくと、あとで見返すときにここから開けます。</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn primary" id="btn-save-wish">入れておく</button>
+      <button class="btn quiet" id="btn-delete-wish" hidden style="margin-top:var(--sp-2)">ほしいBOXから出す</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ほしいBOX：判断 ============ -->
+<div class="sheet" id="sheet-decide" role="dialog" aria-modal="true" aria-labelledby="decide-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-decide" aria-label="戻る">‹</button>
+      <h2 id="decide-title">もう一度、考えてみる</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+
+    <div class="card">
+      <div class="row between" style="gap:var(--sp-3)">
+        <b class="grow wrap-any" id="dc-title" style="font-size:17px"></b>
+        <span class="num" id="dc-amount" style="font-weight:700;flex:none"></span>
+      </div>
+      <p class="tiny" id="dc-elapsed" style="margin:var(--sp-2) 0 0"></p>
+      <button class="btn ghost" id="btn-dc-open" hidden style="margin-top:var(--sp-3);min-height:44px">
+        もう一度、見にいく ↗
+      </button>
+    </div>
+
+    <div id="dc-reason-box" hidden>
+      <div class="sec-title">入れたときの、あなたの言葉</div>
+      <div class="card flat"><p class="wrap-any" id="dc-reason" style="margin:0;line-height:1.8"></p></div>
+    </div>
+
+    <div class="sec-title">今の状態</div>
+    <div class="card flat">
+      <div class="row between"><span class="tiny">今、使っていい金額</span>
+        <b class="num" id="dc-spendable">¥0</b></div>
+      <div class="row between" style="margin-top:6px"><span class="tiny">これを買うと</span>
+        <b class="num" id="dc-after">¥0</b></div>
+      <p class="help" id="dc-impact" style="margin-bottom:0"></p>
+    </div>
+
+    <div class="field" style="margin-top:var(--sp-4)">
+      <label for="dc-memo">今の気持ち（任意）</label>
+      <textarea class="textarea" id="dc-memo" maxlength="200" placeholder="どちらを選んでも、ひとこと残せます。"></textarea>
+    </div>
+
+    <div class="sheet-foot">
+      <div class="btn-row">
+        <button class="btn ghost" id="btn-pass">今回は見送る</button>
+        <button class="btn ghost" id="btn-buy">今も欲しい</button>
+      </div>
+      <p class="help" style="text-align:center">どちらを選んでも大丈夫です。</p>
+      <button class="btn quiet" id="btn-defer" style="margin-top:var(--sp-1)">
+        まだ決めない（もう一度おく）
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ つぶやき ============ -->
+<div class="sheet" id="sheet-note" role="dialog" aria-modal="true" aria-labelledby="note-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-note" aria-label="戻る">‹</button>
+      <h2 id="note-title">ひとこと残す</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+    <p class="muted" style="margin-top:0">お金が動かなかった日のことも、残しておけます。</p>
+    <div class="field">
+      <label for="nt-body">今日のこと</label>
+      <textarea class="textarea" id="nt-body" maxlength="200" style="min-height:120px"
+        placeholder="うれしかったこと、迷ったこと、なんでも。"></textarea>
+    </div>
+    <div class="field">
+      <label for="nt-date">日付</label>
+      <input class="input" type="date" id="nt-date">
+    </div>
+    <div class="sheet-foot">
+      <button class="btn primary" id="btn-save-note">残す</button>
+      <button class="btn quiet" id="btn-delete-note" hidden style="margin-top:var(--sp-2)">これを削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 月末の振り返り ============ -->
+<div class="sheet" id="sheet-review" role="dialog" aria-modal="true" aria-labelledby="rv-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-review" aria-label="戻る">‹</button>
+      <h2 id="rv-title">先月のこと</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+    <p class="muted" style="margin-top:0" id="rv-lead"></p>
+    <div id="rv-words"></div>
+    <div id="rv-quotes"></div>
+    <div id="rv-numbers"></div>
+    <div class="sheet-foot">
+      <button class="btn primary" data-close="sheet-review">読みおえた</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ リカバリー ============ -->
+<div class="sheet" id="sheet-recovery" role="dialog" aria-modal="true" aria-labelledby="rc-title">
+  <div class="sheet-inner">
+    <div class="sheet-bar">
+      <button class="iconbtn" data-close="sheet-recovery" aria-label="戻る">‹</button>
+      <h2 id="rc-title">ここから整える</h2>
+      <span class="spacer" aria-hidden="true"></span>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 var(--sp-2);line-height:1.8" id="rc-body"></p>
+      <p class="muted" style="margin:0;font-size:14px">大丈夫です。取り返さなくてもいいので、次の一歩だけ決めておきましょう。</p>
+    </div>
+    <div class="sec-title">できそうなものを、ひとつ</div>
+    <div class="list" id="rc-options"></div>
+    <div class="sheet-foot">
+      <button class="btn quiet" data-close="sheet-recovery">今はこのままにする</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ オンボーディング ============ -->
+<div id="onboarding">
+  <div class="ob-inner">
+    <div class="ob-dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- 1 -->
+    <div class="ob-step active" data-step="0">
+      <h2 class="ob-title">推しへの想いはそのままに、<br>お金の流れだけ、整える。</h2>
+      <p class="ob-lead">
+        使う・貯まる・また使える。<br>その巡りを、自分のペースで。<br><br>
+        このアプリは、買うのをやめさせるためのものではありません。
+        未来の推し活を先に守っておくことで、今の推し活を安心して楽しむための道具です。
+      </p>
+      <div class="notice">記録はこの端末の中だけに保存されます。どこかに送られたり、誰かと比べられたりすることはありません。</div>
+      <div class="ob-foot">
+        <button class="btn primary" data-ob-next>はじめる</button>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="ob-step" data-step="1">
+      <h2 class="ob-title">あなたの推し活で、<br>いちばん大事なことは？</h2>
+      <p class="ob-lead">迷ったときの自分の基準になります。あとから変えられます。</p>
+      <div class="chips" id="ob-axes"></div>
+      <div class="ob-foot">
+        <button class="btn primary" data-ob-next>次へ</button>
+        <button class="btn quiet" data-ob-next>まだ決めていない</button>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="ob-step" data-step="2">
+      <h2 class="ob-title">月に使えるお金を<br>分けておきます</h2>
+      <p class="ob-lead">先に分けておくと、推し活の分を罪悪感なく使えます。あとから変えられます。</p>
+      <div class="field">
+        <label for="ob-income">月に使えるお金（手取りなど）</label>
+        <div class="amount-wrap">
+          <input class="input amount" id="ob-income" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+        </div>
+        <div class="help">だいたいで大丈夫です。</div>
+      </div>
+      <div id="ob-alloc"></div>
+      <div class="ob-foot">
+        <button class="btn primary" data-ob-next>次へ</button>
+      </div>
+    </div>
+
+    <!-- 4：いま手元にあるお金 -->
+    <div class="ob-step" data-step="3">
+      <h2 class="ob-title">今、手元にあるお金を<br>教えてください</h2>
+      <p class="ob-lead">
+        推し活は今日から始まるわけではありません。すでに貯めてきたお金も、ここから引き継げます。
+      </p>
+      <div class="field">
+        <label for="ob-pool">推し活のために、今ある金額</label>
+        <div class="amount-wrap">
+          <input class="input amount" id="ob-pool" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+        </div>
+        <div class="help">専用口座や封筒に分けてある額など。なければ0のままで大丈夫です。</div>
+      </div>
+      <div class="field">
+        <label for="ob-savings">今ある貯金</label>
+        <div class="amount-wrap">
+          <input class="input amount" id="ob-savings" inputmode="numeric" pattern="[0-9]*" placeholder="0">
+        </div>
+        <div class="help">推し活とは別の、貯金の残高です。だいたいで大丈夫です。</div>
+      </div>
+      <div class="field">
+        <label>今月の推し活費は</label>
+        <div class="chips" id="ob-thismonth">
+          <button class="chip" data-skip="false" aria-pressed="true">まだこれから</button>
+          <button class="chip" data-skip="true"  aria-pressed="false">もう手元にある</button>
+        </div>
+        <div class="help" id="ob-thismonth-help">今月の推し活枠を、いつもどおり足します。</div>
+      </div>
+      <div class="ob-foot">
+        <button class="btn primary" data-ob-next>次へ</button>
+      </div>
+    </div>
+
+    <!-- 5：すでに決まっている予定 -->
+    <div class="ob-step" data-step="4">
+      <h2 class="ob-title">すでに決まっている<br>予定はありますか？</h2>
+      <p class="ob-lead">
+        チケットを取ってあるもの、行くと決めているもの。<br>
+        あとからでも足せるので、思いつくものだけで大丈夫です。
+      </p>
+      <div id="ob-events"></div>
+      <button class="btn ghost" id="ob-add-event" style="margin-top:var(--sp-3)">＋ 予定を足す</button>
+      <div class="ob-foot">
+        <button class="btn primary" data-ob-next>次へ</button>
+        <button class="btn quiet" data-ob-next>今はない</button>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="ob-step" data-step="5">
+      <h2 class="ob-title">準備ができました</h2>
+      <div class="result-box" style="margin-bottom:var(--sp-4)">
+        <div class="k">今、使っていい金額</div>
+        <div class="v num" id="ob-result">¥0</div>
+      </div>
+      <div class="card flat" id="ob-summary"></div>
+      <div class="notice" id="ob-ios" hidden>
+        <b>iPhone・iPadをお使いの方へ</b><br>
+        共有ボタンから「ホーム画面に追加」しておくと、記録が長く残せます。
+        追加していない場合、しばらく開かないとブラウザ側で記録が消えてしまうことがあります。
+      </div>
+      <div class="ob-foot">
+        <button class="btn primary" id="ob-finish">はじめる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   おしめぐ プロトタイプ 段階1
+   構成：
+     [1] ユーティリティ
+     [2] 算出ロジック（純粋関数・テスト対象）  ← CALC:START / CALC:END
+     [3] ストレージ層（IndexedDB 主 / localStorage 従）
+     [4] 状態と集計
+     [5] 画面描画
+     [6] イベント
+   ============================================================ */
+
+/* ---------- [1] ユーティリティ ---------- */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+const yen = n => "¥" + Math.round(n||0).toLocaleString("ja-JP");
+const todayISO = () => { const d=new Date(); return ymdOf(d); };
+const ymdOf = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const ymOf  = ymd => (ymd||"").slice(0,7);
+const uid   = p => p + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+// 全角数字→半角、数字以外を除去
+function toNumeric(str){
+  return String(str||"")
+    .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[^\d]/g, "");
+}
+
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._tid);
+  t._tid = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+/* ---------- [2] 算出ロジック（純粋関数） ---------- */
+/* CALC:START */
+/**
+ * 2つの「YYYY-MM」の差（月数）。b から見た a の進み具合。
+ * ymDiff('2026-12','2026-09') === 3
+ */
+function ymDiff(a, b){
+  const [ay, am] = a.split("-").map(Number);
+  const [by, bm] = b.split("-").map(Number);
+  return (ay - by) * 12 + (am - bm);
+}
+
+/** 予定日までの残り月数（当月を含む）。過去や当月なら 1。 */
+function monthsLeft(dueYmd, currentYm){
+  return Math.max(1, ymDiff(ymOf(dueYmd), currentYm) + 1);
+}
+
+/**
+ * ある未来予定について、当月に積み立てておきたい額。
+ * 不足額を残り月数で割り、100円単位に切り上げる。
+ * ただし不足額そのものを超えない。
+ */
+function monthlyRequirement(ev, savedForEvent, currentYm){
+  if (!ev || ev.status !== "planning") return 0;
+  const shortfall = Math.max(0, (ev.targetAmount||0) - (savedForEvent||0));
+  if (shortfall === 0) return 0;
+  const m = monthsLeft(ev.dueDate, currentYm);
+  const raw = shortfall / m;
+  const rounded = Math.ceil(raw / 100) * 100;
+  return Math.min(rounded, shortfall);
+}
+
+/**
+ * 「今、使っていい金額」の算出。
+ *   推し活枠残高   = 枠 + 前月繰越 − 当月支出 − 当月積立
+ *   当月未積立残   = max(0, 当月必要積立合計 − 当月すでに積み立てた額)
+ *   今使っていい額 = 推し活枠残高 − 当月未積立残
+ * @returns {{spendable:number, rawSpendable:number, balance:number,
+ *            requiredTotal:number, unfunded:number, isBehind:boolean}}
+ */
+function calcSpendable(input){
+  const {
+    oshiBudget = 0, carriedIn = 0,
+    monthExpense = 0, monthContribution = 0,
+    events = [], savedByEvent = {}, currentYm
+  } = input;
+
+  const balance = oshiBudget + carriedIn - monthExpense - monthContribution;
+
+  let requiredTotal = 0;
+  for (const ev of events){
+    requiredTotal += monthlyRequirement(ev, savedByEvent[ev.id] || 0, currentYm);
+  }
+  const unfunded = Math.max(0, requiredTotal - monthContribution);
+  const rawSpendable = balance - unfunded;
+
+  return {
+    balance,
+    requiredTotal,
+    unfunded,
+    rawSpendable,
+    spendable: Math.max(0, rawSpendable),   // 表示は0で止める（設計原則5）
+    isBehind: rawSpendable < 0
+  };
+}
+
+/** 収入と配分率から各枠の金額を出す（1円未満は切り捨て） */
+function splitBudget(income, rates){
+  const save = Math.floor(income * rates.save / 100);
+  const oshi = Math.floor(income * rates.oshi / 100);
+  return { save, oshi, life: Math.max(0, income - save - oshi) };
+}
+/* CALC:END */
+
+/* ---------- [3] ストレージ層 ---------- */
+const CATEGORIES = [
+  {v:"goods",   l:"グッズ",        ic:"🧸"},
+  {v:"ticket",  l:"チケット・入場", ic:"🎫"},
+  {v:"travel",  l:"遠征の交通",     ic:"🚄"},
+  {v:"stay",    l:"宿泊",          ic:"🏨"},
+  {v:"food",    l:"飲食",          ic:"🍰"},
+  {v:"stream",  l:"配信・課金",     ic:"📱"},
+  {v:"other",   l:"その他",        ic:"✨"}
+];
+const KIND_ICON = {live:"🎤", travel:"🚄", goods:"🧸", event:"🎫", other:"✨"};
+const AXES = ["ライブ・現場重視","グッズ厳選","配信重視","遠征重視","接触重視"];
+/** ほしいBOXの待ち時間（分）。長すぎる設定は現実的でないので24時間を上限にする */
+const WAIT_CHOICES = [30, 60, 360, 720, 1440];
+const waitLabel = m => m < 60 ? `${m}分` : `${m / 60}時間`;
+const SCHEMA_VERSION = 2;
+const LS_SETTINGS = "oshimegu.settings";
+
+/**
+ * 記録系は IndexedDB。使えない環境（file:// のChrome等）では
+ * localStorage へフォールバックし、その旨を設定画面で明示する。
+ */
+const Store = (() => {
+  const STORES = ["transactions", "events", "snapshots", "wishItems", "logEntries"];
+  let db = null, mode = "idb";
+
+  function openIDB(){
+    return new Promise((res, rej) => {
+      let req;
+      try { req = indexedDB.open("oshimegu", SCHEMA_VERSION); }
+      catch(e){ return rej(e); }
+      const timer = setTimeout(()=>rej(new Error("timeout")), 3000);
+      req.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains("transactions")){
+          const s = d.createObjectStore("transactions", {keyPath:"id"});
+          s.createIndex("ym","ym"); s.createIndex("date","date"); s.createIndex("eventId","eventId");
+        }
+        if (!d.objectStoreNames.contains("events")){
+          const s = d.createObjectStore("events", {keyPath:"id"});
+          s.createIndex("status","status"); s.createIndex("dueDate","dueDate");
+        }
+        if (!d.objectStoreNames.contains("snapshots")) d.createObjectStore("snapshots", {keyPath:"ym"});
+        // v2で追加。既存ユーザーの既存ストアには手を触れない（前方追記型の移行）
+        if (!d.objectStoreNames.contains("wishItems")){
+          const s = d.createObjectStore("wishItems", {keyPath:"id"});
+          s.createIndex("status","status"); s.createIndex("unlockAt","unlockAt");
+        }
+        if (!d.objectStoreNames.contains("logEntries")){
+          const s = d.createObjectStore("logEntries", {keyPath:"id"});
+          s.createIndex("ym","ym");
+        }
+      };
+      req.onsuccess = e => { clearTimeout(timer); res(e.target.result); };
+      req.onerror   = e => { clearTimeout(timer); rej(e.target.error || new Error("idb error")); };
+      req.onblocked = () => { clearTimeout(timer); rej(new Error("blocked")); };
+    });
+  }
+
+  const lsKey = n => "oshimegu.fallback." + n;
+  const lsAll = n => { try { return JSON.parse(localStorage.getItem(lsKey(n))) || []; } catch(_){ return []; } };
+  const lsSet = (n,a) => localStorage.setItem(lsKey(n), JSON.stringify(a));
+
+  return {
+    get mode(){ return mode; },
+    async init(){
+      try {
+        db = await openIDB();
+        mode = "idb";
+        // ブラウザによる自動削除の対象から外す（要件 DR-08）
+        if (navigator.storage && navigator.storage.persist){
+          navigator.storage.persist().catch(()=>{});
+        }
+      } catch(_){
+        mode = "local";
+      }
+    },
+    async all(name){
+      if (mode === "local") return lsAll(name);
+      return new Promise((res, rej) => {
+        const tx = db.transaction(name, "readonly");
+        const rq = tx.objectStore(name).getAll();
+        rq.onsuccess = () => res(rq.result || []);
+        rq.onerror   = () => rej(rq.error);
+      });
+    },
+    async put(name, obj){
+      if (mode === "local"){
+        const key = name === "snapshots" ? "ym" : "id";
+        const arr = lsAll(name);
+        const i = arr.findIndex(x => x[key] === obj[key]);
+        if (i >= 0) arr[i] = obj; else arr.push(obj);
+        lsSet(name, arr); return obj;
+      }
+      return new Promise((res, rej) => {
+        const tx = db.transaction(name, "readwrite");
+        tx.objectStore(name).put(obj);
+        tx.oncomplete = () => res(obj);
+        tx.onerror    = () => rej(tx.error);
+      });
+    },
+    async del(name, key){
+      if (mode === "local"){
+        const k = name === "snapshots" ? "ym" : "id";
+        lsSet(name, lsAll(name).filter(x => x[k] !== key)); return;
+      }
+      return new Promise((res, rej) => {
+        const tx = db.transaction(name, "readwrite");
+        tx.objectStore(name).delete(key);
+        tx.oncomplete = () => res();
+        tx.onerror    = () => rej(tx.error);
+      });
+    },
+    async clearAll(){
+      if (mode === "local"){ STORES.forEach(n => localStorage.removeItem(lsKey(n))); return; }
+      for (const n of STORES) await new Promise((res,rej)=>{
+        const tx = db.transaction(n,"readwrite");
+        tx.objectStore(n).clear();
+        tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error);
+      });
+    }
+  };
+})();
+
+const Settings = {
+  data: null,
+  defaults(){
+    return {
+      schemaVersion: SCHEMA_VERSION,
+      onboarded: false,
+      axes: [],
+      income: 0,
+      rates: { save:20, oshi:30, life:50 },
+      carryOverPolicy: "next",
+      theme: "auto",
+      lastClosedMonth: null,
+      // ── 使いはじめる時点の状況（途中から始める人のための初期値）
+      startedYm: null,            // 利用を開始した月
+      openingOshiPool: 0,         // 推し活用に、すでに手元にあるお金
+      openingSavings: 0,          // すでにある貯金
+      skipFirstMonthBudget: false,// 今月分はもう手元にある場合、初月の枠を足さない
+      oshigotoSource: "life",
+      oshigotoAmounts: [100, 300, 500],
+      wishWaitMinutes: 1440,
+      lastBackupAt: null,
+      firstUseAt: null,
+      backupHintShownAt: null,
+      recoveryShownFor: null
+    };
+  },
+  load(){
+    try { this.data = Object.assign(this.defaults(), JSON.parse(localStorage.getItem(LS_SETTINGS)) || {}); }
+    catch(_){ this.data = this.defaults(); }
+    // 旧版（時間で保持）からの移行。上限は24時間に丸める
+    if (this.data.wishWaitHours != null){
+      this.data.wishWaitMinutes = Math.min(1440, this.data.wishWaitHours * 60);
+      delete this.data.wishWaitHours;
+      this.save();
+    }
+    if (this.data.wishWaitMinutes > 1440) this.data.wishWaitMinutes = 1440;
+    return this.data;
+  },
+  save(){ localStorage.setItem(LS_SETTINGS, JSON.stringify(this.data)); }
+};
+
+/* ---------- [4] 状態と集計 ---------- */
+const State = {
+  txns: [], events: [], snapshots: [], wishes: [], logs: [],
+  currentYm: ymOf(todayISO()),
+  calc: null,
+  savedByEvent: {},
+
+  async load(){
+    this.txns      = await Store.all("transactions");
+    this.events    = await Store.all("events");
+    this.snapshots = await Store.all("snapshots");
+    this.wishes    = await Store.all("wishItems");
+    this.logs      = await Store.all("logEntries");
+    this.recompute();
+  },
+
+  monthTxns(ym = this.currentYm){ return this.txns.filter(t => t.ym === ym); },
+
+  recompute(){
+    // 予定ごとの積立累計（全期間）
+    const saved = {};
+    for (const t of this.txns){
+      if (t.type === "contribution" && t.eventId) saved[t.eventId] = (saved[t.eventId]||0) + t.amount;
+    }
+    this.savedByEvent = saved;
+
+    // 予定の達成状態を反映
+    for (const ev of this.events){
+      if (ev.status === "planning" && (saved[ev.id]||0) >= ev.targetAmount) ev.status = "reached";
+      else if (ev.status === "reached" && (saved[ev.id]||0) < ev.targetAmount) ev.status = "planning";
+    }
+
+    const s = Settings.data;
+    const budgets = splitBudget(s.income, s.rates);
+    const mt = this.monthTxns();
+    // opening（使いはじめる前のこと）は、その月の枠の計算には含めない
+    const monthExpense      = mt.filter(t=>t.type==="expense"      && !t.opening).reduce((a,b)=>a+b.amount,0);
+    const monthContribution = mt.filter(t=>t.type==="contribution" && !t.opening).reduce((a,b)=>a+b.amount,0);
+    const prev = this.snapshots.find(x => x.ym === prevYm(this.currentYm));
+    const carriedIn = (s.carryOverPolicy === "next" && prev)
+      ? Math.max(0, prev.carriedOut||0)
+      : openingCarry(this.currentYm, this.txns);
+
+    this.budgets = budgets;
+    this.calc = calcSpendable({
+      oshiBudget: monthBudgetFor(this.currentYm, budgets.oshi), carriedIn,
+      monthExpense, monthContribution,
+      events: this.events.filter(e => e.status === "planning"),
+      savedByEvent: saved,
+      currentYm: this.currentYm
+    });
+    this.monthExpense = monthExpense;
+    this.monthContribution = monthContribution;
+
+    // 推し事貯金は生活費枠を原資とする振替。推し活枠は減らさない
+    this.oshigotoTotal      = this.txns.filter(t=>t.type==="oshigoto").reduce((a,b)=>a+b.amount,0);
+    this.oshigotoThisMonth  = mt.filter(t=>t.type==="oshigoto").reduce((a,b)=>a+b.amount,0);
+    this.savingsThisMonth   = budgets.save + this.oshigotoThisMonth;
+    this.lifeLeftThisMonth  = Math.max(0, budgets.life - this.oshigotoThisMonth);
+    // 実際に動いたお金だけを「今ある貯金」として数える（枠は計画であって残高ではない）
+    this.savingsNow = (s.openingSavings || 0) + this.oshigotoTotal;
+    this.oshiPoolNow = this.calc.balance;
+  },
+
+  /** 月次締め（冪等）：未処理の月を古い順に確定する */
+  async closeMonths(){
+    const s = Settings.data;
+    if (!s.onboarded) return;
+    const now = ymOf(todayISO());
+    if (!s.lastClosedMonth){ s.lastClosedMonth = now; Settings.save(); return; }
+    let ym = s.lastClosedMonth;
+    let guard = 0;
+    while (ymDiff(now, ym) > 0 && guard++ < 120){
+      if (!this.snapshots.find(x => x.ym === ym)){
+        const b = splitBudget(s.income, s.rates);
+        const budget = monthBudgetFor(ym, b.oshi);
+        const mt = this.txns.filter(t => t.ym === ym);
+        const exp = mt.filter(t=>t.type==="expense"      && !t.opening).reduce((a,c)=>a+c.amount,0);
+        const con = mt.filter(t=>t.type==="contribution" && !t.opening).reduce((a,c)=>a+c.amount,0);
+        const prev = this.snapshots.find(x => x.ym === prevYm(ym));
+        const carriedIn = (s.carryOverPolicy === "next" && prev)
+          ? Math.max(0, prev.carriedOut||0)
+          : openingCarry(ym, this.txns);
+        const left = budget + carriedIn - exp - con;
+        const snap = {
+          ym, income:s.income, oshiBudget:budget, carriedIn,
+          carriedOut: s.carryOverPolicy === "next" ? Math.max(0, left) : 0,
+          totalExpense:exp, totalContribution:con,
+          countTxn: mt.length, countMemo: mt.filter(t=>t.memo).length,
+          closedAt: new Date().toISOString()
+        };
+        this.snapshots.push(snap);
+        await Store.put("snapshots", snap);
+      }
+      ym = nextYm(ym);
+    }
+    s.lastClosedMonth = now; Settings.save();
+    this.recompute();
+  }
+};
+/**
+ * 使いはじめの月に、手元にあるお金をプールとして持ち込む。
+ * すでに予定へ取り分けてある分（opening な積立）はプールから差し引く。
+ * すでに支払い済みのもの（opening な支出）は、もう手元にないので差し引かない。
+ */
+function openingCarry(ym, txns){
+  const s = Settings.data;
+  if (!s.startedYm || ym !== s.startedYm) return 0;
+  const earmarked = txns
+    .filter(t => t.opening && t.type === "contribution")
+    .reduce((a,b) => a + b.amount, 0);
+  return Math.max(0, (s.openingOshiPool || 0) - earmarked);
+}
+
+/** 初月に「今月分はもう手元にある」を選んだ場合、その月だけ枠を足さない */
+function monthBudgetFor(ym, oshiBudget){
+  const s = Settings.data;
+  if (s.skipFirstMonthBudget && s.startedYm === ym) return 0;
+  return oshiBudget;
+}
+
+function prevYm(ym){ const [y,m]=ym.split("-").map(Number); const d=new Date(y, m-2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; }
+function nextYm(ym){ const [y,m]=ym.split("-").map(Number); const d=new Date(y, m, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; }
+
+/* ---------- [5] 画面描画 ---------- */
+function go(name){
+  $$(".screen").forEach(el => el.classList.toggle("active", el.id === "s-"+name));
+  $$(".nav [data-go]").forEach(b =>
+    b.setAttribute("aria-current", b.dataset.go === name ? "page" : "false"));
+  window.scrollTo(0,0);
+  if (name === "home")   renderHome();
+  if (name === "events") renderEvents();
+  if (name === "log")    renderLog();
+  if (name === "wish")   renderWish();
+  if (name === "settings") renderSettings();
+}
+
+function renderAll(){ renderHome(); renderEvents(); renderLog(); renderWish(); }
+
+function renderHome(){
+  const s = Settings.data, c = State.calc, b = State.budgets;
+
+  // 軸
+  const ax = $("#axis-line");
+  ax.innerHTML = s.axes.length
+    ? s.axes.map(a => `<span class="axis-chip">${esc(a)}</span>`).join("")
+    : `<span class="axis-chip" style="opacity:.7">軸はまだ決めていない</span>`;
+
+  // ヒーロー
+  $("#hero-amount").textContent = yen(c.spendable);
+  const note = $("#hero-note");
+  if (s.income === 0){
+    $("#hero-amount").textContent = "—";
+    note.innerHTML = `設定から、月に使えるお金を入れると計算できます。`;
+  } else if (c.isBehind){
+    note.innerHTML = `予定より少し先に使っている状態です。<br>
+      ここから整えていけば大丈夫です。`;
+  } else if (c.requiredTotal > 0){
+    note.innerHTML = `未来の予定のために、今月は ${yen(c.requiredTotal)} を先に取り分けています。`;
+  } else {
+    note.innerHTML = `先に守っておきたい予定を登録すると、ここに反映されます。`;
+  }
+
+  // 枠
+  const total = b.oshi;
+  const used  = State.monthExpense + State.monthContribution;
+  const left  = Math.max(0, total - used);
+  const pct   = total > 0 ? Math.min(100, Math.round(left / total * 100)) : 0;
+  $("#budget-label").textContent = `${Number(State.currentYm.slice(5))}月の推し活枠`;
+  $("#budget-ratio").textContent = total > 0 ? `${pct}% 残っています` : "";
+  $("#budget-bar").style.width = pct + "%";
+  $("#budget-left").textContent  = yen(left);
+  $("#budget-total").textContent = yen(total);
+  $("#pool-now").textContent     = yen(State.oshiPoolNow);
+  $("#savings-now").textContent  = yen(State.savingsNow);
+
+  // 予定
+  const evs = State.events
+    .filter(e => (e.status === "planning" || e.status === "reached") && !e.settled)
+    .sort((a,b2) => a.dueDate.localeCompare(b2.dueDate)).slice(0,3);
+  $("#home-events").innerHTML = evs.length ? `<div class="list">${
+    evs.map(e => eventRow(e, true)).join("")}</div>`
+    : `<div class="card flat"><div class="empty" style="padding:var(--sp-4)">
+        <p>まだ予定がありません。</p>
+        <p class="tiny">ライブや遠征を登録しておくと、その分を先に守れます。</p>
+        <button class="btn ghost" style="margin-top:var(--sp-3)" onclick="openEvent()">予定を追加する</button>
+       </div></div>`;
+
+  // 推し事貯金
+  renderOshigoto();
+
+  // 最近（ログと同じ見せ方＝ことばを主役にする）
+  const recent = buildLogFeed().slice(0,3);
+  $("#home-recent").innerHTML = recent.length ? `<div class="list">${
+    recent.map(logRow).join("")}</div>`
+    : `<div class="card flat"><div class="empty" style="padding:var(--sp-4)">
+        <p>記録はまだありません。</p>
+        <p class="tiny">下の＋から、使った金額を残せます。</p></div></div>`;
+
+  // ほしいBOXに考えどきのものがあれば、ナビに印をつける
+  const ready = State.wishes.filter(w => w.status === "waiting" && wishUnlocked(w)).length;
+  const nav = document.querySelector('.nav [data-go="wish"]');
+  if (nav) nav.innerHTML = `<span class="ic">🎁</span>ほしい${ready ? `<span class="dot"></span>` : ""}`;
+}
+
+function eventRow(e, compact){
+  const saved = State.savedByEvent[e.id] || 0;
+  const pct = e.targetAmount > 0 ? Math.min(100, Math.round(saved/e.targetAmount*100)) : 0;
+  const need = monthlyRequirement(e, saved, State.currentYm);
+  const done = e.status === "reached";
+  const settled = e.settled || e.status === "done";
+  return `<button class="list-item" onclick="openEvent('${e.id}')">
+    <span class="ic">${KIND_ICON[e.kind]||"✨"}</span>
+    <span class="grow col" style="gap:4px">
+      <span class="row between" style="gap:8px">
+        <b class="trunc" style="font-size:15px">${esc(e.title)}</b>
+        <span class="tiny num" style="flex:none">${fmtDate(e.dueDate)}</span>
+      </span>
+      ${settled ? `` : `<span class="bar thin"><i style="width:${pct}%"></i></span>`}
+      <span class="tiny num">${settled
+        ? "支払い済み ・ " + yen(e.targetAmount)
+        : `${yen(saved)} / ${yen(e.targetAmount)}${
+            done ? " ・ 準備できました" : (need>0 && !compact ? ` ・ 今月 ${yen(need)}` : "")}`}</span>
+    </span>
+  </button>`;
+}
+
+function txnRow(t){
+  const cat = CATEGORIES.find(c => c.v === t.category);
+  const isC = t.type === "contribution";
+  const ev  = isC && t.eventId ? State.events.find(e=>e.id===t.eventId) : null;
+  const label = isC ? (ev ? `${esc(ev.title)}へ積み立て` : "未来へ積み立て") : (cat ? cat.l : "その他");
+  return `<button class="list-item" onclick="openTxn('${t.id}')">
+    <span class="ic">${isC ? "🌱" : (cat ? cat.ic : "✨")}</span>
+    <span class="grow col" style="gap:2px">
+      <span class="trunc" style="font-size:15px;font-weight:600">${label}</span>
+      ${t.memo ? `<span class="tiny clamp2" style="line-height:1.5">${esc(t.memo)}</span>` : ``}
+      <span class="tiny num">${fmtDate(t.date)}</span>
+    </span>
+    <span class="amt num">${isC?"+":""}${yen(t.amount)}</span>
+  </button>`;
+}
+
+function renderEvents(){
+  const evs = [...State.events].sort((a,b)=>{
+    const rank = x => x.status==="canceled"?2:(x.status==="reached"?1:0);
+    return rank(a)-rank(b) || a.dueDate.localeCompare(b.dueDate);
+  });
+  $("#events-list").innerHTML = evs.length
+    ? `<div class="list">${evs.map(e=>eventRow(e,false)).join("")}</div>`
+    : `<div class="empty"><div class="big">📅</div>
+        <p>まだ予定がありません。</p>
+        <p class="tiny">「11月のライブ」「年末の遠征」など、<br>先に確保しておきたいものを入れてみてください。</p>
+        <button class="btn ghost" style="margin-top:var(--sp-4)" onclick="openEvent()">予定を追加する</button></div>`;
+}
+
+let logFilter = "all", logQuery = "";
+const expandedYears = new Set();
+const expandedMonths = new Set();
+
+/** 支出・積立・推し事貯金・見送り・つぶやきを1本の時系列にまとめる */
+function buildLogFeed(){
+  const feed = [];
+  for (const t of State.txns){
+    feed.push({
+      id: t.id, kind: t.type, date: t.date, ym: t.ym, amount: t.amount,
+      memo: t.memo || "", createdAt: t.createdAt, ref: t
+    });
+  }
+  for (const w of State.wishes.filter(x => x.status === "passed")){
+    const d = (w.decidedAt || w.createdAt).slice(0,10);
+    feed.push({
+      id: w.id, kind: "passed", date: d, ym: ymOf(d), amount: w.amount,
+      memo: w.decisionMemo || w.reasonMemo || "", createdAt: w.decidedAt || w.createdAt, ref: w
+    });
+  }
+  for (const l of State.logs){
+    feed.push({
+      id: l.id, kind: "note", date: l.date, ym: l.ym, amount: null,
+      memo: l.body, createdAt: l.createdAt, ref: l
+    });
+  }
+  return feed.sort((a,b) =>
+    b.date.localeCompare(a.date) || (b.createdAt||"").localeCompare(a.createdAt||""));
+}
+
+const LOG_META = {
+  expense:      { ic:"🧸", label:t => (CATEGORIES.find(c=>c.v===t.ref.category)||{}).l || "使った", sign:"" },
+  contribution: { ic:"🌱", label:t => { const e = State.events.find(x=>x.id===t.ref.eventId);
+                                        return e ? `${e.title}へ積み立て` : "未来へ積み立て"; }, sign:"+" },
+  oshigoto:     { ic:"💛", label:t => t.ref.category === "saving" ? "貯金にまわした" : "推し事貯金", sign:"+" },
+  passed:       { ic:"🍃", label:t => `${t.ref.title} を見送った`, sign:"" },
+  note:         { ic:"✎",  label:() => "ひとこと", sign:"" }
+};
+
+function logRow(it){
+  const m = LOG_META[it.kind];
+  const ic = it.kind === "expense" ? ((CATEGORIES.find(c=>c.v===it.ref.category)||{}).ic || "✨") : m.ic;
+  const open = it.kind === "note"   ? `openNote('${it.id}')`
+             : it.kind === "passed" ? `openWish('${it.id}')`
+             : `openTxn('${it.id}')`;
+  const quiet = it.kind === "passed" || it.kind === "note";
+  // メモを主役にし、金額・分類は副次情報として添える
+  return `<button class="list-item" onclick="${open}">
+    <span class="ic">${ic}</span>
+    <span class="grow col" style="gap:3px">
+      ${it.memo
+        ? `<span class="wrap-any" style="font-size:15px;line-height:1.7">${esc(it.memo)}</span>`
+        : `<span style="font-size:15px;font-weight:600">${esc(m.label(it))}</span>`}
+      <span class="tiny trunc">${fmtDate(it.date)}${it.memo ? " ・ " + esc(m.label(it)) : ""}${
+        it.ref && it.ref.opening ? `<span class="tag-open">はじめる前</span>` : ""}</span>
+    </span>
+    ${it.amount != null
+      ? `<span class="amt num" style="${quiet||m.sign?"opacity:.75;":""}">${m.sign}${yen(it.amount)}</span>`
+      : ``}
+  </button>`;
+}
+
+function renderLog(){
+  const el = $("#log-list"); if (!el) return;
+  let feed = buildLogFeed();
+
+  if (logFilter === "memo")    feed = feed.filter(x => x.memo);
+  if (logFilter === "expense") feed = feed.filter(x => x.kind === "expense");
+  if (logFilter === "saved")   feed = feed.filter(x => x.kind === "contribution" || x.kind === "oshigoto");
+  if (logFilter === "passed")  feed = feed.filter(x => x.kind === "passed");
+  if (logQuery){
+    const q = logQuery.toLowerCase();
+    feed = feed.filter(x => (x.memo || "").toLowerCase().includes(q) ||
+                            LOG_META[x.kind].label(x).toLowerCase().includes(q));
+  }
+
+  if (!feed.length){
+    el.innerHTML = `<div class="empty"><div class="big">📖</div>
+      <p>${logQuery || logFilter !== "all" ? "見つかりませんでした。" : "記録はまだありません。"}</p>
+      <p class="tiny">${logQuery || logFilter !== "all"
+        ? "条件を変えてみてください。"
+        : "使ったこと・貯めたこと・見送ったことが、<br>あなたのひとことと一緒に並びます。"}</p></div>`;
+    return;
+  }
+
+  const byMonth = {};
+  for (const it of feed) (byMonth[it.ym] ||= []).push(it);
+  const months = Object.keys(byMonth).sort().reverse();
+  // 絞り込みや検索の最中は、探しているものが隠れないよう全部ひらく
+  const searching = !!logQuery || logFilter !== "all";
+
+  const monthFoot = (ym, arr) => {
+    const exp = arr.filter(x => x.kind === "expense").reduce((a,b)=>a+b.amount,0);
+    const memos = arr.filter(x => x.memo).length;
+    return `<p class="tiny" style="margin:8px 2px 0;opacity:.8">
+      ${memos ? `この月に残したことば ${memos} 件` : "この月は、ことばが残っていません"}
+      ${exp ? ` ・ 使った合計 ${yen(exp)}` : ""}</p>`;
+  };
+
+  let html = "";
+
+  // ── 今月は、そのまま全部出す ──
+  const cur = State.currentYm;
+  html += `<div class="row between sec-title" style="gap:var(--sp-2);margin-top:0">
+      <span>${Number(cur.slice(0,4))}年${Number(cur.slice(5))}月（今月）</span>
+      ${byMonth[cur] ? `<button class="chip sm" data-review="${cur}" style="font-weight:600">まとめて読む</button>` : ``}
+    </div>`;
+  html += byMonth[cur]
+    ? `<div class="list">${byMonth[cur].map(logRow).join("")}</div>` + monthFoot(cur, byMonth[cur])
+    : `<div class="notice">${searching ? "今月には見つかりませんでした。" : "今月の記録はまだありません。"}</div>`;
+
+  // ── 過去は、年 → 月 の順に畳んでおく ──
+  const past = months.filter(m => m !== cur);
+  if (past.length){
+    const byYear = {};
+    past.forEach(m => (byYear[m.slice(0,4)] ||= []).push(m));
+    html += `<div class="sec-title">過去の記録</div>`;
+    for (const y of Object.keys(byYear).sort().reverse()){
+      const ms = byYear[y];
+      const cnt = ms.reduce((a,m) => a + byMonth[m].length, 0);
+      const yOpen = searching || expandedYears.has(y);
+      html += `<button class="fold" data-year="${y}" aria-expanded="${yOpen}">
+          <span class="caret" aria-hidden="true"></span>
+          <span class="grow" style="font-weight:700">${Number(y)}年</span>
+          <span class="tiny" style="flex:none">${ms.length}か月 ・ ${cnt}件</span>
+        </button>`;
+      if (!yOpen) continue;
+      html += `<div class="fold-body">`;
+      for (const m of ms){
+        const arr = byMonth[m];
+        const mOpen = searching || expandedMonths.has(m);
+        const memos = arr.filter(x => x.memo).length;
+        html += `<button class="fold sub" data-month="${m}" aria-expanded="${mOpen}">
+            <span class="caret" aria-hidden="true"></span>
+            <span class="grow">${Number(m.slice(5))}月</span>
+            <span class="tiny" style="flex:none">${arr.length}件${memos ? ` ・ ことば${memos}` : ""}</span>
+          </button>`;
+        if (!mOpen) continue;
+        html += `<div style="padding:0 0 var(--sp-3)">
+            <div class="list">${arr.map(logRow).join("")}</div>
+            <div class="row" style="justify-content:flex-end;margin-top:8px">
+              <button class="chip sm" data-review="${m}" style="font-weight:600">まとめて読む</button>
+            </div>
+          </div>`;
+      }
+      html += `</div>`;
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+function renderSettings(){
+  const s = Settings.data;
+  $("#set-income").value = s.income ? String(s.income) : "";
+  renderAlloc("#set-alloc", s.rates, () => Number(toNumeric($("#set-income").value)) || 0);
+  $("#set-axes").innerHTML = AXES.map(a =>
+    `<button class="chip" data-axis="${esc(a)}" aria-pressed="${s.axes.includes(a)}">${esc(a)}</button>`).join("");
+  $("#set-wait").innerHTML = WAIT_CHOICES.map(m =>
+    `<button class="chip" data-wait="${m}" aria-pressed="${s.wishWaitMinutes===m}">${waitLabel(m)}</button>`).join("");
+  $("#set-pool").value    = s.openingOshiPool ? String(s.openingOshiPool) : "";
+  $("#set-savings").value = s.openingSavings  ? String(s.openingSavings)  : "";
+  const earmarked = State.txns.filter(t => t.opening && t.type === "contribution")
+                              .reduce((a,b) => a + b.amount, 0);
+  $("#set-opening-note").textContent = earmarked
+    ? `このうち ${yen(earmarked)} は、すでに予定へ取り分けています。`
+    : "";
+  renderBackupStatus();
+  renderInstall();
+  renderStorageState();
+  $("#storage-info").innerHTML = Store.mode === "idb"
+    ? "この端末のデータベース（IndexedDB）に保存しています。長期の記録に対応した保存方式です。"
+    : "この環境ではデータベースが使えないため、簡易保存（localStorage）で動いています。<br>試作の動作確認には問題ありませんが、長期利用ではデータベースが使える形での起動を推奨します。";
+}
+
+/** 配分スライダー：貯金と推し活を動かし、生活は自動で残りになる */
+function renderAlloc(sel, rates, getIncome){
+  const host = $(sel);
+  host.innerHTML = `
+    <div class="field" style="margin-bottom:var(--sp-3)">
+      <div class="alloc-row"><span class="name">貯金</span><span class="val" data-v="save">${rates.save}%</span></div>
+      <input type="range" min="0" max="100" step="5" value="${rates.save}" data-r="save">
+      <div class="alloc-amt num" data-a="save">¥0</div>
+    </div>
+    <div class="field" style="margin-bottom:var(--sp-3)">
+      <div class="alloc-row"><span class="name">推し活</span><span class="val" data-v="oshi">${rates.oshi}%</span></div>
+      <input type="range" min="0" max="100" step="5" value="${rates.oshi}" data-r="oshi">
+      <div class="alloc-amt num" data-a="oshi">¥0</div>
+    </div>
+    <div class="card flat" style="margin-bottom:0;padding:var(--sp-3)">
+      <div class="alloc-row"><span class="name">生活</span><span class="val" data-v="life">${rates.life}%</span></div>
+      <div class="alloc-amt num" data-a="life">¥0</div>
+      <p class="help" style="margin-top:2px">残りが自動で入ります。</p>
+    </div>`;
+
+  const sync = () => {
+    let save = Number(host.querySelector('[data-r=save]').value);
+    let oshi = Number(host.querySelector('[data-r=oshi]').value);
+    if (save + oshi > 100){                      // 合計100%を人に計算させない
+      oshi = 100 - save;
+      host.querySelector('[data-r=oshi]').value = oshi;
+    }
+    const life = 100 - save - oshi;
+    rates.save = save; rates.oshi = oshi; rates.life = life;
+    const inc = getIncome();
+    const b = splitBudget(inc, rates);
+    host.querySelector('[data-v=save]').textContent = save + "%";
+    host.querySelector('[data-v=oshi]').textContent = oshi + "%";
+    host.querySelector('[data-v=life]').textContent = life + "%";
+    host.querySelector('[data-a=save]').textContent = yen(b.save);
+    host.querySelector('[data-a=oshi]').textContent = yen(b.oshi);
+    host.querySelector('[data-a=life]').textContent = yen(b.life);
+    host._rates = {...rates};
+  };
+  host.querySelectorAll('input[type=range]').forEach(r => r.addEventListener("input", sync));
+  host._sync = sync;
+  sync();
+}
+
+const esc = s => String(s??"").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function fmtDate(ymd){
+  if (!ymd) return "";
+  const [y,m,d] = ymd.split("-").map(Number);
+  const now = new Date();
+  return (y === now.getFullYear()) ? `${m}/${d}` : `${y}/${m}/${d}`;
+}
+
+/* ---------- [6] シート：記録 ---------- */
+let editingTxn = null, txnType = "expense";
+
+function openTxn(id){
+  editingTxn = id ? State.txns.find(t=>t.id===id) : null;
+  // 貯蓄系は保存時に oshigoto へ寄せているので、画面では「貯金にまわした」に戻す
+  txnType = editingTxn ? (editingTxn.type === "oshigoto" ? "saving" : editingTxn.type) : "expense";
+  $("#txn-title").textContent = editingTxn ? "記録を見直す" : "記録する";
+  $$("#txn-type .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.type===txnType)));
+  // 新規のときだけ種別を選べる
+  $("#txn-type").hidden = !!editingTxn;
+  $("#txn-type-fixed").hidden = !editingTxn;
+  if (editingTxn){
+    $("#txn-type-label").textContent =
+      { expense:"使った", contribution:"未来へ積み立てた", saving:"貯金にまわした" }[txnType] || "";
+  }
+
+  $("#txn-category").innerHTML = CATEGORIES.map(c=>`<option value="${c.v}">${c.ic} ${c.l}</option>`).join("");
+  // 積み立て先は必須。選べない選択肢（＝保存できない状態）は最初から出さない
+  const planning = State.events.filter(e=>e.status==="planning"||e.status==="reached");
+  $("#txn-event").innerHTML =
+    planning.map(e=>`<option value="${e.id}">${KIND_ICON[e.kind]||"✨"} ${esc(e.title)}</option>`).join("");
+
+  $("#txn-amount").value   = editingTxn ? String(editingTxn.amount) : "";
+  $("#txn-category").value = editingTxn && editingTxn.type === "expense" ? editingTxn.category : "goods";
+  $("#txn-event").value    = editingTxn && editingTxn.eventId ? editingTxn.eventId : "";
+  $("#txn-date").value     = editingTxn ? editingTxn.date : todayISO();
+  $("#txn-memo").value     = editingTxn ? (editingTxn.memo||"") : "";
+  $("#txn-memo-count").textContent = String($("#txn-memo").value.length);
+  $("#btn-delete-txn").hidden = !editingTxn;
+  $("#txn-amount-err").hidden = true;
+  $("#txn-opening-toggle").setAttribute("aria-pressed",
+    String(!!(editingTxn && editingTxn.opening)));
+  applyTxnType();
+  openSheet("sheet-txn");
+  if (!editingTxn) setTimeout(()=>$("#txn-amount").focus(), 250);
+}
+
+function applyTxnType(){
+  const isC = txnType === "contribution";
+  const isS = txnType === "saving";
+  const planning = State.events.filter(e => e.status === "planning" || e.status === "reached");
+  const hasEvent = planning.length > 0;
+
+  $("#txn-cat-field").hidden     = isC || isS;
+  $("#txn-event-field").hidden   = !isC || !hasEvent;
+  $("#txn-noevent-field").hidden = !isC || hasEvent;
+  $("#txn-saving-field").hidden  = !isS;
+  $("#txn-event-err").hidden = true;
+
+  // 「はじめる前のこと」は支出だけに出す。
+  // 積み立てで使うと、手元のお金を減らさずに予定へ充当できてしまい、
+  // どこからも出ていないお金が生まれる。すでに用意してある分は、
+  // 予定側の「もう一部を用意してある／支払いは済んでいる」で入れる。
+  const openingCard = $("#txn-opening-card");
+  openingCard.hidden = isC || isS;
+  if (openingCard.hidden) $("#txn-opening-toggle").setAttribute("aria-pressed", "false");
+
+  if (isC && hasEvent){
+    if (!$("#txn-event").value) $("#txn-event").value = planning[0].id;
+    const ev = planning.find(e => e.id === $("#txn-event").value);
+    if (ev){
+      const saved = State.savedByEvent[ev.id] || 0;
+      const rest = Math.max(0, ev.targetAmount - saved);
+      $("#txn-event-help").textContent = rest > 0
+        ? `この予定は、あと ${yen(rest)} で用意できます。`
+        : "この予定は、もう用意できています。";
+    }
+  }
+  if (isS){
+    $("#txn-saving-note").innerHTML =
+      `行き先を決めずに貯めておくお金です。<br>
+       ${Settings.data.oshigotoSource === "life"
+         ? "生活費から貯金へまわします。推し活枠は減りません。"
+         : "貯金として足します。"}`;
+  }
+}
+
+async function saveTxn(){
+  const amount = Number(toNumeric($("#txn-amount").value));
+  const err = $("#txn-amount-err");
+  if (!amount || amount < 1){
+    err.textContent = "金額を入れてください。"; err.hidden = false;
+    $("#txn-amount").focus(); return;
+  }
+  if (txnType === "contribution" && !$("#txn-event").value){
+    // 予定がない状態で積み立てを選んだとき。行き止まりにせず、貯金へ切り替える道を出す
+    const e2 = $("#txn-event-err");
+    e2.textContent = "積み立て先がありません。「貯金にまわした」なら、行き先を決めずに貯められます。";
+    e2.hidden = false;
+    $("#txn-noevent-field").hidden = false;
+    return;
+  }
+  err.hidden = true; $("#txn-event-err").hidden = true;
+  const date = $("#txn-date").value || todayISO();
+  // 「貯金にまわした」は、推し事貯金と同じ振替として扱う（生活費 → 貯金）
+  const isSaving = txnType === "saving";
+  const obj = {
+    id: editingTxn ? editingTxn.id : uid("txn"),
+    ym: ymOf(date), date,
+    type: isSaving ? "oshigoto" : txnType,
+    category: txnType === "expense" ? $("#txn-category").value
+            : isSaving ? "saving" : "contribution",
+    amount,
+    eventId: txnType === "contribution" ? ($("#txn-event").value || null) : null,
+    memo: $("#txn-memo").value.trim(),
+    // 支出以外では「はじめる前」を持たせない（会計の辻褄が合わなくなるため）
+    opening: txnType === "expense" &&
+             $("#txn-opening-toggle").getAttribute("aria-pressed") === "true",
+    createdAt: editingTxn ? editingTxn.createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  await Store.put("transactions", obj);
+  const i = State.txns.findIndex(t=>t.id===obj.id);
+  if (i>=0) State.txns[i]=obj; else State.txns.push(obj);
+  State.recompute(); renderAll();
+  closeSheet("sheet-txn");
+  toast(editingTxn ? "記録を更新しました" : "記録しました");
+  maybeRecovery();
+}
+
+async function deleteTxn(){
+  if (!editingTxn) return;
+  await Store.del("transactions", editingTxn.id);
+  State.txns = State.txns.filter(t=>t.id!==editingTxn.id);
+  State.recompute(); renderAll();
+  closeSheet("sheet-txn"); toast("削除しました");
+}
+
+/* ---------- シート：予定 ---------- */
+let editingEvent = null, evKind = "live", evState = "new";
+
+function applyEvState(){
+  $("#ev-prepared-field").hidden = evState !== "saving";
+  $("#ev-paid-field").hidden     = evState !== "paid";
+  $$("#ev-state .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.state === evState)));
+  if (evState === "saving"){
+    const pool = State.calc ? State.calc.balance : 0;
+    $("#ev-prepared-help").textContent =
+      `いま自由に使えるお金（${yen(pool)}）から、この予定に取り分けます。`;
+  }
+}
+
+function openEvent(id){
+  editingEvent = id ? State.events.find(e=>e.id===id) : null;
+  evKind = editingEvent ? editingEvent.kind : "live";
+  evState = "new";
+  $("#event-title").textContent = editingEvent ? "予定を見直す" : "未来の予定を追加";
+  $$("#ev-kind .chip").forEach(c=>c.setAttribute("aria-pressed", String(c.dataset.kind===evKind)));
+  $("#ev-title").value  = editingEvent ? editingEvent.title : "";
+  $("#ev-amount").value = editingEvent ? String(editingEvent.targetAmount) : "";
+  $("#ev-date").value   = editingEvent ? editingEvent.dueDate : "";
+  $("#ev-memo").value   = editingEvent ? (editingEvent.memo||"") : "";
+  $("#ev-prepared").value = "";
+  $("#ev-paid-date").value = todayISO();
+  // すでにある予定の編集では、初期状態の入力欄は出さない
+  $("#ev-existing").hidden = !!editingEvent;
+  applyEvState();
+  $("#btn-delete-event").hidden = !editingEvent;
+  ["ev-title-err","ev-amount-err","ev-date-err","ev-prepared-err"].forEach(i=>$("#"+i).hidden=true);
+
+  const pg = $("#ev-progress");
+  if (editingEvent){
+    const saved = State.savedByEvent[editingEvent.id] || 0;
+    const pct = editingEvent.targetAmount>0 ? Math.min(100, Math.round(saved/editingEvent.targetAmount*100)) : 0;
+    const need = monthlyRequirement(editingEvent, saved, State.currentYm);
+    $("#ev-saved").textContent = `${yen(saved)} / ${yen(editingEvent.targetAmount)}`;
+    $("#ev-bar").style.width = pct+"%";
+    $("#ev-monthly").textContent = editingEvent.status === "reached"
+      ? "この予定は準備できています。"
+      : (need>0 ? `この予定のために、今月は ${yen(need)} を取り分けています。` : "");
+    pg.hidden = false;
+  } else pg.hidden = true;
+
+  openSheet("sheet-event");
+  if (!editingEvent) setTimeout(()=>$("#ev-title").focus(), 250);
+}
+
+async function saveEvent(){
+  const title = $("#ev-title").value.trim();
+  const amount = Number(toNumeric($("#ev-amount").value));
+  const date = $("#ev-date").value;
+  let ok = true;
+  const set = (id,msg)=>{ const e=$("#"+id); e.textContent=msg; e.hidden=!msg; if(msg) ok=false; };
+  set("ev-title-err",  title ? "" : "なんの予定か、書いてみてください。");
+  set("ev-amount-err", amount>=1 ? "" : "必要な金額を入れてください。");
+  set("ev-date-err",   date ? "" : "予定日を選んでください。");
+  if (!ok) return;
+
+  // 「もう一部を用意してある」場合、手元のお金の範囲を超えていないか確かめる
+  let prepared = 0;
+  if (!editingEvent && evState === "saving"){
+    prepared = Number(toNumeric($("#ev-prepared").value));
+    const pool = State.calc.balance;
+    if (!prepared || prepared < 1){
+      set("ev-prepared-err", "用意できている金額を入れてください。"); return;
+    }
+    if (prepared > amount){
+      set("ev-prepared-err", "必要な金額より多くなっています。"); return;
+    }
+    if (prepared > pool){
+      set("ev-prepared-err",
+        `いま自由に使えるお金（${yen(pool)}）を超えています。設定から、手元のお金を直せます。`);
+      return;
+    }
+  }
+
+  const now = new Date();
+  const obj = {
+    id: editingEvent ? editingEvent.id : uid("evt"),
+    title, kind: evKind, targetAmount: amount, dueDate: date,
+    status: editingEvent ? editingEvent.status : "planning",
+    memo: $("#ev-memo").value.trim(),
+    createdAt: editingEvent ? editingEvent.createdAt : now.toISOString(),
+    updatedAt: now.toISOString()
+  };
+
+  if (!editingEvent && evState === "paid"){
+    // すでに支払い済み。手元のお金は動かさず、記録としてだけ残す
+    obj.status = "done"; obj.settled = true;
+    const d = $("#ev-paid-date").value || todayISO();
+    const txn = {
+      id: uid("txn"), ym: ymOf(d), date: d, type: "expense",
+      category: obj.kind === "live" || obj.kind === "event" ? "ticket" : "other",
+      amount, eventId: obj.id, memo: "", opening: true,
+      createdAt: now.toISOString(), updatedAt: now.toISOString()
+    };
+    await Store.put("transactions", txn); State.txns.push(txn);
+  }
+
+  await Store.put("events", obj);
+  const i = State.events.findIndex(e=>e.id===obj.id);
+  if (i>=0) State.events[i]=obj; else State.events.push(obj);
+
+  if (!editingEvent && evState === "saving" && prepared > 0){
+    // 手元のお金から、この予定へ取り分ける（今月の積立ノルマには数えない）
+    const d = todayISO();
+    const txn = {
+      id: uid("txn"), ym: ymOf(d), date: d, type: "contribution",
+      category: "contribution", amount: prepared, eventId: obj.id,
+      memo: "", opening: true,
+      createdAt: now.toISOString(), updatedAt: now.toISOString()
+    };
+    await Store.put("transactions", txn); State.txns.push(txn);
+  }
+
+  State.recompute(); renderAll();
+  closeSheet("sheet-event");
+  toast(editingEvent ? "予定を更新しました"
+        : evState === "paid" ? "支払い済みとして記録しました" : "予定を追加しました");
+}
+
+async function deleteEvent(){
+  if (!editingEvent) return;
+  const saved = State.savedByEvent[editingEvent.id] || 0;
+  if (saved > 0 && !confirm(`この予定には ${yen(saved)} 積み立てています。\nやめると、その分は推し活枠に戻ります。`)) return;
+  await Store.del("events", editingEvent.id);
+  State.events = State.events.filter(e=>e.id!==editingEvent.id);
+  // 積立記録は予定との紐付けだけ外す（記録自体は残す）
+  for (const t of State.txns.filter(t=>t.eventId===editingEvent.id)){
+    t.eventId = null; t.updatedAt = new Date().toISOString();
+    await Store.put("transactions", t);
+  }
+  State.recompute(); renderAll();
+  closeSheet("sheet-event"); toast("予定をやめました");
+}
+
+/* ---------- ほしいBOX ---------- */
+let editingWish = null, decidingWish = null;
+
+function wishUnlocked(w){ return Date.now() >= new Date(w.unlockAt).getTime(); }
+
+/** http(s) のみ許可する。javascript: などを踏まないための入口チェック */
+function safeUrl(raw){
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  try {
+    const u = new URL(v);
+    return (u.protocol === "http:" || u.protocol === "https:") ? u.href : null;
+  } catch(_){ return null; }
+}
+function openUrl(raw){
+  const u = safeUrl(raw);
+  if (!u) return;
+  window.open(u, "_blank", "noopener,noreferrer");
+}
+/** 入力中の内容に応じて、開くボタンの有効・無効を切り替える */
+function syncWishUrlBtn(){
+  const btn = $("#btn-wi-open"); if (!btn) return;
+  btn.disabled = !safeUrl($("#wi-url").value);
+}
+
+function fmtUnlock(iso){
+  const d = new Date(iso), now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const tomorrow = new Date(now.getTime() + 86400000).toDateString() === d.toDateString();
+  const hm = `${d.getHours()}時ごろ`;
+  if (sameDay)  return `今日の${hm}`;
+  if (tomorrow) return `明日の${hm}`;
+  return `${d.getMonth()+1}月${d.getDate()}日の${hm}`;
+}
+
+function renderWish(){
+  const waiting = State.wishes.filter(w => w.status === "waiting")
+    .sort((a,b) => a.unlockAt.localeCompare(b.unlockAt));
+  const decided = State.wishes.filter(w => w.status !== "waiting")
+    .sort((a,b) => (b.decidedAt||"").localeCompare(a.decidedAt||"")).slice(0, 20);
+
+  $("#wish-wait-label").textContent = waitLabel(Settings.data.wishWaitMinutes);
+
+  const card = w => {
+    const ready = wishUnlocked(w);
+    return `<button class="list-item" onclick="openDecide('${w.id}')">
+      <span class="ic">${ready ? "🔔" : "🕊"}</span>
+      <span class="grow col" style="gap:3px">
+        <span class="trunc" style="font-size:15px;font-weight:700">${esc(w.title)}</span>
+        ${w.reasonMemo ? `<span class="tiny clamp2" style="line-height:1.5">${esc(w.reasonMemo)}</span>` : ``}
+        <span class="tiny">${ready ? "考えるじゅんびができました" : `${fmtUnlock(w.unlockAt)}に、もう一度`}</span>
+      </span>
+      <span class="amt num">${yen(w.amount)}</span>
+    </button>`;
+  };
+
+  const decidedRow = w => `<button class="list-item" onclick="openWish('${w.id}')">
+      <span class="ic">${w.status === "bought" ? "🎀" : "🍃"}</span>
+      <span class="grow col" style="gap:2px">
+        <span class="trunc" style="font-size:14px;font-weight:600">${esc(w.title)}</span>
+        ${w.decisionMemo ? `<span class="tiny clamp2">${esc(w.decisionMemo)}</span>` : ``}
+        <span class="tiny">${w.status === "bought" ? "迎えた" : "見送った"} ・ ${fmtDate((w.decidedAt||"").slice(0,10))}</span>
+      </span>
+      <span class="amt num" style="opacity:.55">${yen(w.amount)}</span>
+    </button>`;
+
+  let html = "";
+  if (waiting.length){
+    const ready = waiting.filter(wishUnlocked);
+    if (ready.length){
+      html += `<div class="sec-title" style="margin-top:0">考えるじゅんびができました</div>
+        <div class="list">${ready.map(card).join("")}</div>`;
+    }
+    const still = waiting.filter(w => !wishUnlocked(w));
+    if (still.length){
+      html += `<div class="sec-title">置いてあるもの</div><div class="list">${still.map(card).join("")}</div>`;
+    }
+  } else {
+    html += `<div class="empty"><div class="big">🎁</div>
+      <p>今は、なにも置かれていません。</p>
+      <p class="tiny">欲しいと思ったものを見つけたら、<br>買う前にここへ入れてみてください。</p>
+      <button class="btn ghost" style="margin-top:var(--sp-4)" onclick="openWish()">入れてみる</button></div>`;
+  }
+  if (decided.length){
+    html += `<div class="sec-title">これまで考えたもの</div><div class="list">${decided.map(decidedRow).join("")}</div>`;
+  }
+  $("#wish-list").innerHTML = html;
+}
+
+function openWish(id){
+  editingWish = id ? State.wishes.find(w => w.id === id) : null;
+  const done = editingWish && editingWish.status !== "waiting";
+  $("#wish-title").textContent = editingWish ? (done ? "考えたもの" : "置いてあるもの") : "ほしいBOXに入れる";
+  $("#wi-title").value  = editingWish ? editingWish.title : "";
+  $("#wi-amount").value = editingWish ? String(editingWish.amount) : "";
+  $("#wi-reason").value = editingWish ? (editingWish.reasonMemo||"") : "";
+  $("#wi-url").value    = editingWish ? (editingWish.url||"") : "";
+  syncWishUrlBtn();
+  $("#btn-delete-wish").hidden = !editingWish;
+  $("#btn-save-wish").textContent = editingWish ? "保存する" : "入れておく";
+  ["wi-title-err","wi-amount-err"].forEach(i => $("#"+i).hidden = true);
+  openSheet("sheet-wish");
+  if (!editingWish) setTimeout(()=>$("#wi-title").focus(), 250);
+}
+
+async function saveWish(){
+  const title = $("#wi-title").value.trim();
+  const amount = Number(toNumeric($("#wi-amount").value));
+  let ok = true;
+  const set = (id,msg) => { const e = $("#"+id); e.textContent = msg; e.hidden = !msg; if (msg) ok = false; };
+  set("wi-title-err",  title ? "" : "なにが欲しいか、書いてみてください。");
+  set("wi-amount-err", amount >= 1 ? "" : "金額を入れてください。");
+  if (!ok) return;
+
+  const now = new Date();
+  const obj = editingWish ? {...editingWish} : {
+    id: uid("wsh"),
+    status: "waiting",
+    createdAt: now.toISOString(),
+    unlockAt: new Date(now.getTime() + Settings.data.wishWaitMinutes * 60000).toISOString(),
+    decidedAt: null, decisionMemo: "", linkedTxnId: null
+  };
+  obj.title = title; obj.amount = amount;
+  obj.reasonMemo = $("#wi-reason").value.trim();
+  obj.url = safeUrl($("#wi-url").value);
+
+  await Store.put("wishItems", obj);
+  const i = State.wishes.findIndex(w => w.id === obj.id);
+  if (i >= 0) State.wishes[i] = obj; else State.wishes.push(obj);
+  renderWish(); renderHome();
+  closeSheet("sheet-wish");
+  toast(editingWish ? "保存しました" : `${waitLabel(Settings.data.wishWaitMinutes)}後に、また会いましょう`);
+}
+
+async function deleteWish(){
+  if (!editingWish) return;
+  await Store.del("wishItems", editingWish.id);
+  State.wishes = State.wishes.filter(w => w.id !== editingWish.id);
+  renderWish(); renderHome(); closeSheet("sheet-wish"); toast("ほしいBOXから出しました");
+}
+
+function openDecide(id){
+  const w = State.wishes.find(x => x.id === id);
+  if (!w) return;
+  if (w.status !== "waiting") return openWish(id);
+  if (!wishUnlocked(w)) return openWish(id);   // まだのものは編集扱い（壁は作らない）
+
+  decidingWish = w;
+  $("#dc-title").textContent  = w.title;
+  $("#dc-amount").textContent = yen(w.amount);
+  const mins = Math.floor((Date.now() - new Date(w.createdAt).getTime()) / 60000);
+  const elapsed = mins < 60 ? `${mins}分` : `${Math.floor(mins / 60)}時間`;
+  $("#dc-elapsed").textContent = `入れてから ${elapsed} たちました` +
+    (w.deferCount ? ` ・ ${w.deferCount}回おき直しています` : "");
+  $("#dc-reason-box").hidden = !w.reasonMemo;
+  $("#dc-reason").textContent = w.reasonMemo || "";
+  $("#btn-dc-open").hidden = !safeUrl(w.url);
+
+  const sp = State.calc.spendable;
+  const after = sp - w.amount;
+  $("#dc-spendable").textContent = yen(sp);
+  $("#dc-after").textContent = after >= 0 ? yen(after) : yen(0);
+  $("#dc-impact").textContent = after >= 0
+    ? "今の枠のなかで収まります。"
+    : `いま買うと、未来の予定に取り分けている分から ${yen(-after)} を使うことになります。`;
+  $("#dc-memo").value = "";
+  openSheet("sheet-decide");
+}
+
+/**
+ * まだ決めないで、もう一度ほしいBOXに戻す。
+ * 待ち時間の上限は24時間だが、これを繰り返せばそれ以上のあいだ置いておける。
+ * 「長く禁じる」のではなく「そのつど自分で決め直す」形にしている。
+ */
+async function deferWish(){
+  const w = decidingWish; if (!w) return;
+  const mins = Settings.data.wishWaitMinutes;
+  w.unlockAt = new Date(Date.now() + mins * 60000).toISOString();
+  w.deferCount = (w.deferCount || 0) + 1;
+  const memo = $("#dc-memo").value.trim();
+  if (memo) w.reasonMemo = memo;   // 迷っている今の気持ちを上書きで残す
+  await Store.put("wishItems", w);
+  closeSheet("sheet-decide");
+  renderWish(); renderHome();
+  toast(`${fmtUnlock(w.unlockAt)}に、また出します`);
+  decidingWish = null;
+}
+
+async function decideWish(bought){
+  const w = decidingWish; if (!w) return;
+  const memo = $("#dc-memo").value.trim();
+  const now = new Date();
+  w.status = bought ? "bought" : "passed";
+  w.decidedAt = now.toISOString();
+  w.decisionMemo = memo;
+
+  if (bought){
+    const date = todayISO();
+    const txn = {
+      id: uid("txn"), ym: ymOf(date), date, type: "expense",
+      category: "goods", amount: w.amount, eventId: null,
+      memo: memo || w.title,
+      createdAt: now.toISOString(), updatedAt: now.toISOString()
+    };
+    await Store.put("transactions", txn);
+    State.txns.push(txn);
+    w.linkedTxnId = txn.id;
+  }
+  await Store.put("wishItems", w);
+  State.recompute();
+  closeSheet("sheet-decide");
+  renderWish(); renderAll();
+  // どちらの選択も同じトーンで返す（達成演出はしない）
+  toast(bought ? "記録しました" : "見送ったことを記録しました");
+  decidingWish = null;
+  maybeRecovery();
+}
+
+/* ---------- 推し事貯金 ---------- */
+function renderOshigoto(){
+  const s = Settings.data;
+  $("#oshigoto-total").textContent = yen(State.oshigotoTotal || 0);
+  $("#oshigoto-btns").innerHTML = s.oshigotoAmounts.map(a =>
+    `<button class="chip" data-oshigoto="${a}">尊い…… +${a.toLocaleString("ja-JP")}円</button>`).join("");
+}
+
+let oshigotoBurst = [];
+async function addOshigoto(amount){
+  // 連打そのものは止めない。短時間に集中したときだけ一度確認する
+  const now = Date.now();
+  oshigotoBurst = oshigotoBurst.filter(t => now - t < 60000);
+  oshigotoBurst.push(now);
+  if (oshigotoBurst.length === 5 &&
+      !confirm("短い時間に何度か貯めています。\nこのまま続けますか？")){
+    oshigotoBurst = []; return;
+  }
+  const date = todayISO();
+  const obj = {
+    id: uid("txn"), ym: ymOf(date), date, type: "oshigoto",
+    category: "oshigoto", amount, eventId: null, memo: "",
+    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+  };
+  await Store.put("transactions", obj);
+  State.txns.push(obj);
+  State.recompute(); renderHome(); renderLog();
+  toast(`${yen(amount)} 貯まりました`);
+}
+
+/* ---------- つぶやき ---------- */
+let editingNote = null;
+function openNote(id){
+  editingNote = id ? State.logs.find(l => l.id === id) : null;
+  $("#note-title").textContent = editingNote ? "ひとことを見直す" : "ひとこと残す";
+  $("#nt-body").value = editingNote ? editingNote.body : "";
+  $("#nt-date").value = editingNote ? editingNote.date : todayISO();
+  $("#btn-delete-note").hidden = !editingNote;
+  openSheet("sheet-note");
+  if (!editingNote) setTimeout(()=>$("#nt-body").focus(), 250);
+}
+async function saveNote(){
+  const body = $("#nt-body").value.trim();
+  if (!body){ toast("なにか書いてから残してください"); return; }
+  const date = $("#nt-date").value || todayISO();
+  const obj = {
+    id: editingNote ? editingNote.id : uid("log"),
+    ym: ymOf(date), date, body,
+    createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  await Store.put("logEntries", obj);
+  const i = State.logs.findIndex(l => l.id === obj.id);
+  if (i >= 0) State.logs[i] = obj; else State.logs.push(obj);
+  closeSheet("sheet-note"); renderLog(); renderHome();
+  toast("残しました");
+}
+async function deleteNote(){
+  if (!editingNote) return;
+  await Store.del("logEntries", editingNote.id);
+  State.logs = State.logs.filter(l => l.id !== editingNote.id);
+  closeSheet("sheet-note"); renderLog(); renderHome(); toast("削除しました");
+}
+
+/* ---------- 月末の振り返り ---------- */
+/**
+ * 数字ではなく「その月に残したことば」を主役にする。
+ * グラフ・前月比・スコアは出さない（設計原則6／やらないことリスト）。
+ */
+function openReview(ym){
+  const feed = buildLogFeed().filter(x => x.ym === ym);
+  const words = feed.filter(x => x.memo);
+  const y = Number(ym.slice(0,4)), m = Number(ym.slice(5));
+
+  $("#rv-title").textContent = `${y}年${m}月のこと`;
+  $("#rv-lead").textContent = words.length
+    ? "その月に、あなたが残したことばです。"
+    : "この月は、ことばは残っていませんでした。それもひとつの月です。";
+
+  $("#rv-words").innerHTML = words.length
+    ? `<div class="list">${words.map(logRow).join("")}</div>`
+    : "";
+
+  // ことばだけを続けて読むための場所。長い人もいるので、はじめは畳んでおく
+  $("#rv-quotes").innerHTML = words.length
+    ? `<button class="fold" id="rv-quotes-toggle" aria-expanded="false" style="margin-top:var(--sp-4)">
+         <span class="caret" aria-hidden="true"></span>
+         <span class="grow" style="font-weight:700">あなたのことば</span>
+         <span class="tiny" style="flex:none">${words.length}件</span>
+       </button>
+       <div class="card flat" id="rv-quotes-body" hidden>
+         <ul style="margin:0;padding-left:1.2em;line-height:1.9">
+           ${words.map(w => `<li class="wrap-any" style="margin-bottom:6px">${esc(w.memo)}
+             <span class="tiny" style="opacity:.7">（${fmtDate(w.date)}）</span></li>`).join("")}
+         </ul>
+       </div>`
+    : "";
+
+  const exp   = feed.filter(x => x.kind === "expense").reduce((a,b)=>a+b.amount,0);
+  const saved = feed.filter(x => x.kind === "contribution" || x.kind === "oshigoto")
+                    .reduce((a,b)=>a+b.amount,0);
+  const passed = feed.filter(x => x.kind === "passed").length;
+  const snap = State.snapshots.find(s => s.ym === ym);
+
+  // 数字は最後に、小さく添えるだけ
+  const rows = [
+    ["使ったお金", yen(exp)],
+    saved  ? ["未来と貯金にまわしたお金", yen(saved)] : null,
+    passed ? ["考えて、見送ったもの", `${passed}件`] : null,
+    snap && snap.carriedOut ? ["来月へ持ちこした分", yen(snap.carriedOut)] : null
+  ].filter(Boolean);
+
+  $("#rv-numbers").innerHTML = `
+    <div class="sec-title">数字のほう</div>
+    <div class="card flat">
+      ${rows.map(([k,v]) => `<div class="row between" style="padding:3px 0">
+        <span class="tiny">${k}</span><b class="num" style="font-size:14px">${v}</b></div>`).join("")}
+      <p class="help" style="margin-bottom:0">
+        多い少ないを見るためのものではありません。そういう月だった、という記録です。</p>
+    </div>`;
+
+  const tg = $("#rv-quotes-toggle");
+  if (tg) tg.addEventListener("click", () => {
+    const open = tg.getAttribute("aria-expanded") === "true";
+    tg.setAttribute("aria-expanded", String(!open));
+    $("#rv-quotes-body").hidden = open;
+  });
+
+  openSheet("sheet-review");
+}
+
+/** 月が変わって最初に開いたとき、先月の振り返りを一度だけ出す */
+function maybeReview(){
+  const s = Settings.data;
+  const prev = prevYm(State.currentYm);
+  if (s.reviewShownFor === prev) return;
+  if (s.startedYm && ymDiff(prev, s.startedYm) < 0) { s.reviewShownFor = prev; Settings.save(); return; }
+  const has = State.txns.some(t => t.ym === prev) || State.logs.some(l => l.ym === prev);
+  s.reviewShownFor = prev; Settings.save();
+  if (!has) return;
+  openReview(prev);
+}
+
+/* ---------- リカバリー ---------- */
+function maybeRecovery(){
+  const s = Settings.data;
+  if (!State.calc.isBehind) return;
+  if (s.recoveryShownFor === State.currentYm) return;   // 同じ状態では一度だけ
+  s.recoveryShownFor = State.currentYm; Settings.save();
+  openRecovery();
+}
+
+function openRecovery(){
+  const short = Math.abs(State.calc.rawSpendable);
+  $("#rc-body").innerHTML = State.calc.isBehind
+    ? `いま、未来の予定に取り分けている分から ${yen(short)} を先に使っている状態です。`
+    : `いまは予定どおりです。気になったときは、ここから整えられます。`;
+
+  // 待ち時間は上限24時間。すでに最長なら、別の一手をすすめる
+  const cur = Settings.data.wishWaitMinutes;
+  const longer = WAIT_CHOICES.filter(m => m > cur);
+  const waitOpt = longer.length
+    ? { ic:"🕊", t:`次に気になったものは、${waitLabel(longer[longer.length-1])}おいてみる`,
+        d:"ほしいBOXの待ち時間を、少しだけ長くします",
+        run: async () => {
+          Settings.data.wishWaitMinutes = longer[longer.length-1];
+          Settings.save(); renderSettings(); renderWish();
+          toast(`待ち時間を${waitLabel(Settings.data.wishWaitMinutes)}にしました`);
+        } }
+    : { ic:"🕊", t:"気になったものは、まずほしいBOXに入れる",
+        d:"買う前にいったん置く場所です。今の待ち時間は24時間です",
+        run: async () => { go("wish"); } };
+
+  const opts = [
+    waitOpt,
+    { ic:"🌱", t:"今週、500円だけ貯めてみる", d:"推し事貯金に500円入れます",
+      run: async () => { await addOshigoto(500); } },
+    { ic:"📅", t:"未来の予定を、ひとつ見直す", d:"金額や日付を変えると、今月の取り分けも変わります",
+      run: async () => { go("events"); } }
+  ];
+  $("#rc-options").innerHTML = opts.map((o,i) =>
+    `<button class="list-item" data-rc="${i}">
+       <span class="ic">${o.ic}</span>
+       <span class="grow col" style="gap:2px">
+         <span style="font-size:15px;font-weight:600">${o.t}</span>
+         <span class="tiny">${o.d}</span>
+       </span></button>`).join("");
+  $("#rc-options")._opts = opts;
+  openSheet("sheet-recovery");
+}
+
+/* ---------- 書き出し・控え ---------- */
+function download(filename, blob){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+const stamp = () => todayISO().replace(/-/g,"");
+
+/** RFC4180 に沿った1セルのエスケープ */
+function csvCell(v){
+  const s = String(v ?? "");
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+
+function buildCsv(){
+  const head = ["種別","日付","カテゴリ","品名","金額","関連予定","メモ","登録日時"];
+  const rows = [head];
+  const evName = id => { const e = State.events.find(x=>x.id===id); return e ? e.title : ""; };
+  const catName = v => { const c = CATEGORIES.find(x=>x.v===v); return c ? c.l : v; };
+
+  for (const t of State.txns){
+    const kind = t.type === "expense" ? "支出"
+               : t.type === "contribution" ? "積立"
+               : (t.category === "saving" ? "貯金" : "推し事貯金");
+    rows.push([kind, t.date, t.type==="expense"?catName(t.category):"", "",
+               t.amount, evName(t.eventId), t.memo || "", t.createdAt]);
+  }
+  for (const w of State.wishes.filter(x=>x.status==="passed")){
+    rows.push(["見送り", (w.decidedAt||"").slice(0,10), "", w.title, w.amount, "",
+               w.decisionMemo || w.reasonMemo || "", w.createdAt]);
+  }
+  for (const l of State.logs){
+    rows.push(["つぶやき", l.date, "", "", "", "", l.body, l.createdAt]);
+  }
+  rows.sort((a,b) => a === head ? -1 : b === head ? 1 : String(a[1]).localeCompare(String(b[1])));
+  // BOM付きUTF-8・CRLF（表計算ソフトでの文字化けを避ける）
+  return "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
+}
+
+function exportCsv(){
+  if (!State.txns.length && !State.logs.length){ toast("書き出せる記録がまだありません"); return; }
+  download(`oshimegu_${stamp()}_all.csv`,
+    new Blob([buildCsv()], {type:"text/csv;charset=utf-8"}));
+  toast("CSVを書き出しました");
+}
+
+function exportBackup(){
+  const payload = {
+    app: "oshimegu", schemaVersion: SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    settings: Settings.data,
+    events: State.events, transactions: State.txns,
+    wishItems: State.wishes, logEntries: State.logs, snapshots: State.snapshots
+  };
+  download(`oshimegu_backup_${stamp()}.json`,
+    new Blob([JSON.stringify(payload)], {type:"application/json"}));
+  Settings.data.lastBackupAt = new Date().toISOString(); Settings.save();
+  renderSettings();
+  toast("控えを保存しました");
+}
+
+async function importBackup(file){
+  let data;
+  try { data = JSON.parse(await file.text()); }
+  catch(_){ alert("このファイルは読み取れませんでした。\n控え（JSON）を選んでください。"); return; }
+  if (!data || data.app !== "oshimegu" || !Array.isArray(data.transactions)){
+    alert("おしめぐの控えではないようです。\n記録はそのままにしてあります。"); return;
+  }
+  const n = data.transactions.length;
+  if (!confirm(`控えの中身：記録 ${n} 件（${(data.exportedAt||"").slice(0,10)} 時点）\n\n` +
+               `今ある記録をすべて置きかえます。よろしいですか？\n（念のため、先に今の控えを保存しておくこともできます）`)) return;
+
+  await Store.clearAll();
+  for (const t of data.transactions || []) await Store.put("transactions", t);
+  for (const e of data.events       || []) await Store.put("events", e);
+  for (const w of data.wishItems    || []) await Store.put("wishItems", w);
+  for (const l of data.logEntries   || []) await Store.put("logEntries", l);
+  for (const s of data.snapshots    || []) await Store.put("snapshots", s);
+  if (data.settings){
+    Settings.data = Object.assign(Settings.defaults(), data.settings, {schemaVersion: SCHEMA_VERSION});
+    Settings.save();
+  }
+  await State.load();
+  applyTheme(); renderAll(); renderWish(); renderSettings();
+  toast("控えから戻しました");
+}
+
+/** 90日に一度だけ、静かに置いておく（催促はしない） */
+function maybeBackupHint(){
+  const s = Settings.data;
+  if (!State.txns.length) return;
+  const base = s.lastBackupAt || s.firstUseAt || null;
+  if (!base){ s.firstUseAt = new Date().toISOString(); Settings.save(); return; }
+  const days = Math.floor((Date.now() - new Date(base).getTime()) / 86400000);
+  if (days < 90) return;
+  if (s.backupHintShownAt &&
+      Date.now() - new Date(s.backupHintShownAt).getTime() < 90*86400000) return;
+  s.backupHintShownAt = new Date().toISOString(); Settings.save();
+  toast("そろそろ、記録の控えを保存しておきますか？");
+}
+
+function renderBackupStatus(){
+  const el = $("#backup-status"); if (!el) return;
+  const last = Settings.data.lastBackupAt;
+  if (!last){ el.textContent = "まだ控えを保存していません。"; return; }
+  const days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+  el.textContent = `最後に控えを保存したのは ${last.slice(0,10)}（${days}日前）です。`;
+}
+
+/* ---------- シート開閉 ---------- */
+let scrollLock = 0;
+function openSheet(id){
+  scrollLock = window.scrollY;
+  document.body.style.position="fixed";
+  document.body.style.top = `-${scrollLock}px`;
+  document.body.style.width="100%";
+  $("#"+id).classList.add("open");
+}
+function closeSheet(id){
+  $("#"+id).classList.remove("open");
+  document.body.style.position=""; document.body.style.top=""; document.body.style.width="";
+  window.scrollTo(0, scrollLock);
+}
+
+/* ---------- オンボーディング ---------- */
+const OB_LAST = 5;
+let obStep = 0, obAxes = [], obRates = {save:20, oshi:30, life:50};
+let obSkipFirst = false, obEvents = [];
+
+/** 手順の中で登録する「すでに決まっている予定」 */
+function renderObEvents(){
+  const host = $("#ob-events");
+  if (!obEvents.length){
+    host.innerHTML = `<div class="notice">まだ登録されていません。</div>`; return;
+  }
+  host.innerHTML = `<div class="list">${obEvents.map((e,i) => {
+    const state = e.state === "paid" ? "支払い済み"
+                : e.state === "saving" ? `${yen(e.prepared)} 用意ずみ` : "これから貯める";
+    return `<div class="list-item">
+      <span class="ic">${KIND_ICON[e.kind]||"✨"}</span>
+      <span class="grow col" style="gap:2px">
+        <span class="trunc" style="font-size:15px;font-weight:600">${esc(e.title)}</span>
+        <span class="tiny">${yen(e.targetAmount)} ・ ${fmtDate(e.dueDate)} ・ ${state}</span>
+      </span>
+      <button class="iconbtn" data-ob-del="${i}" aria-label="消す">✕</button>
+    </div>`; }).join("")}</div>`;
+}
+
+/** 手順の中から、通常の予定シートを使って登録する */
+function obAddEvent(){
+  editingEvent = null; evKind = "live"; evState = "new";
+  $("#event-title").textContent = "決まっている予定";
+  $$("#ev-kind .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.kind === "live")));
+  ["ev-title","ev-amount","ev-date","ev-memo","ev-prepared"].forEach(i => $("#"+i).value = "");
+  $("#ev-paid-date").value = todayISO();
+  $("#ev-existing").hidden = false;
+  $("#ev-progress").hidden = true;
+  $("#btn-delete-event").hidden = true;
+  applyEvState();
+  ["ev-title-err","ev-amount-err","ev-date-err","ev-prepared-err"].forEach(i => $("#"+i).hidden = true);
+  $("#sheet-event").dataset.ob = "1";
+  openSheet("sheet-event");
+  setTimeout(()=>$("#ev-title").focus(), 250);
+}
+
+/** 手順中の登録は、その場では保存せず一覧に貯めておく */
+function obCollectEvent(){
+  const title = $("#ev-title").value.trim();
+  const amount = Number(toNumeric($("#ev-amount").value));
+  const date = $("#ev-date").value;
+  let ok = true;
+  const set = (id,msg)=>{ const e=$("#"+id); e.textContent=msg; e.hidden=!msg; if(msg) ok=false; };
+  set("ev-title-err",  title ? "" : "なんの予定か、書いてみてください。");
+  set("ev-amount-err", amount>=1 ? "" : "必要な金額を入れてください。");
+  set("ev-date-err",   date ? "" : "予定日を選んでください。");
+  let prepared = 0;
+  if (evState === "saving"){
+    prepared = Number(toNumeric($("#ev-prepared").value));
+    if (!prepared || prepared > amount) set("ev-prepared-err", "必要な金額の範囲で入れてください。");
+  }
+  if (!ok) return;
+  obEvents.push({ title, kind: evKind, targetAmount: amount, dueDate: date,
+                  memo: $("#ev-memo").value.trim(), state: evState, prepared,
+                  paidDate: $("#ev-paid-date").value || todayISO() });
+  delete $("#sheet-event").dataset.ob;
+  closeSheet("sheet-event");
+  renderObEvents();
+}
+
+function startOnboarding(){
+  obStep = 0; obAxes = []; obRates = {save:20, oshi:30, life:50};
+  obSkipFirst = false; obEvents = [];
+  renderObEvents();
+  $("#ob-axes").innerHTML = AXES.map(a=>`<button class="chip" data-ob-axis="${esc(a)}" aria-pressed="false">${esc(a)}</button>`).join("");
+  renderAlloc("#ob-alloc", obRates, () => Number(toNumeric($("#ob-income").value)) || 0);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = window.navigator.standalone === true ||
+                     window.matchMedia("(display-mode: standalone)").matches;
+  $("#ob-ios").hidden = !(isIOS && !standalone);
+  showObStep(0);
+  $("#onboarding").classList.add("open");
+}
+/** 手順の入力から、開始時点の状態を試算する */
+function obPreview(){
+  const income = Number(toNumeric($("#ob-income").value)) || 0;
+  const rates = $("#ob-alloc")._rates || obRates;
+  const pool  = Number(toNumeric($("#ob-pool").value)) || 0;
+  const budget = obSkipFirst ? 0 : splitBudget(income, rates).oshi;
+  const earmarked = obEvents.filter(e => e.state === "saving")
+                            .reduce((a,b) => a + b.prepared, 0);
+  const free = Math.max(0, pool - earmarked);
+  const ym = ymOf(todayISO());
+  const events = obEvents
+    .filter(e => e.state !== "paid")
+    .map((e,i) => ({ id:"ob"+i, status:"planning", targetAmount:e.targetAmount, dueDate:e.dueDate }));
+  const savedByEvent = {};
+  obEvents.filter(e => e.state !== "paid").forEach((e,i) => { savedByEvent["ob"+i] = e.prepared || 0; });
+  const c = calcSpendable({
+    oshiBudget: budget, carriedIn: free,
+    monthExpense: 0, monthContribution: 0,
+    events, savedByEvent, currentYm: ym
+  });
+  return { income, rates, pool, budget, earmarked, free, calc: c };
+}
+
+function showObStep(i){
+  obStep = i;
+  $$(".ob-step").forEach(s=>s.classList.toggle("active", Number(s.dataset.step)===i));
+  $$(".ob-dots i").forEach((d,n)=>d.classList.toggle("on", n===i));
+  if (i === OB_LAST){
+    const p = obPreview();
+    $("#ob-result").textContent = yen(p.calc.spendable);
+    const rows = [
+      ["今月の推し活枠", p.budget ? yen(p.budget) : "今月は足しません"],
+      ["引き継ぐお金", yen(p.pool)],
+      p.earmarked ? ["うち、予定に取り分け", yen(p.earmarked)] : null,
+      p.calc.requiredTotal ? ["今月ぶんの積み立て", yen(p.calc.requiredTotal)] : null,
+      ["今ある貯金", yen(Number(toNumeric($("#ob-savings").value)) || 0)]
+    ].filter(Boolean);
+    $("#ob-summary").innerHTML = rows.map(([k,v]) =>
+      `<div class="row between" style="padding:3px 0">
+         <span class="tiny">${k}</span><b class="num" style="font-size:14px">${v}</b></div>`).join("") +
+      `<p class="help" style="margin-bottom:0">あとから、設定でいつでも直せます。</p>`;
+  }
+  document.querySelector(".ob-inner").scrollTop = 0;
+  window.scrollTo(0,0);
+}
+
+async function finishOnboarding(){
+  const s = Settings.data;
+  const now = new Date();
+  const ym = ymOf(todayISO());
+  s.onboarded = true;
+  s.axes = obAxes;
+  s.income = Number(toNumeric($("#ob-income").value)) || 0;
+  s.rates = { ...($("#ob-alloc")._rates || obRates) };
+  s.openingOshiPool = Number(toNumeric($("#ob-pool").value)) || 0;
+  s.openingSavings  = Number(toNumeric($("#ob-savings").value)) || 0;
+  s.skipFirstMonthBudget = obSkipFirst;
+  s.startedYm = ym;
+  s.firstUseAt = now.toISOString();
+  s.lastClosedMonth = ym;
+  Settings.save();
+
+  // すでに決まっている予定を、実データとして書き出す
+  for (const e of obEvents){
+    const ev = {
+      id: uid("evt"), title: e.title, kind: e.kind,
+      targetAmount: e.targetAmount, dueDate: e.dueDate, memo: e.memo,
+      status: e.state === "paid" ? "done" : "planning",
+      settled: e.state === "paid",
+      createdAt: now.toISOString(), updatedAt: now.toISOString()
+    };
+    await Store.put("events", ev); State.events.push(ev);
+
+    if (e.state === "paid"){
+      const d = e.paidDate || todayISO();
+      const t = { id: uid("txn"), ym: ymOf(d), date: d, type:"expense",
+        category: (e.kind==="live"||e.kind==="event") ? "ticket" : "other",
+        amount: e.targetAmount, eventId: ev.id, memo:"", opening:true,
+        createdAt: now.toISOString(), updatedAt: now.toISOString() };
+      await Store.put("transactions", t); State.txns.push(t);
+    } else if (e.state === "saving" && e.prepared > 0){
+      const d = todayISO();
+      const t = { id: uid("txn"), ym: ymOf(d), date: d, type:"contribution",
+        category:"contribution", amount: e.prepared, eventId: ev.id, memo:"", opening:true,
+        createdAt: now.toISOString(), updatedAt: now.toISOString() };
+      await Store.put("transactions", t); State.txns.push(t);
+    }
+  }
+
+  $("#onboarding").classList.remove("open");
+  State.recompute(); renderAll(); go("home");
+}
+
+/* ---------- ホーム画面への追加・保存の確からしさ ---------- */
+const Platform = {
+  get isIOS(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  },
+  get isStandalone(){
+    return window.navigator.standalone === true ||
+           window.matchMedia("(display-mode: standalone)").matches;
+  }
+};
+
+let installPrompt = null;
+
+/**
+ * ホーム画面に追加されていないiOSでは、しばらく開かないと
+ * ブラウザ側で記録が消えることがある。脅す書き方はせず、
+ * 「長く残すための置き場所」として案内する。
+ */
+function renderInstall(){
+  const lead = $("#install-lead"), btn = $("#btn-install"), steps = $("#install-steps");
+  if (!lead) return;
+
+  if (Platform.isStandalone){
+    lead.textContent = "ホーム画面から開いています。記録はこのまま残ります。";
+    btn.hidden = true; steps.hidden = true;
+    return;
+  }
+  if (installPrompt){
+    lead.textContent = "ホーム画面に置いておくと、アプリのように開けて、記録も長く残せます。";
+    btn.hidden = false; steps.hidden = true;
+    return;
+  }
+  btn.hidden = true; steps.hidden = false;
+  lead.textContent = "ホーム画面に置いておくと、アプリのように開けて、記録も長く残せます。";
+  steps.innerHTML = Platform.isIOS
+    ? `<b>iPhone・iPadの場合</b><br>
+       画面下の共有ボタン <b>⬆</b> →「ホーム画面に追加」を選びます。<br><br>
+       追加していないと、しばらく開かない間にブラウザ側で記録が整理されてしまうことがあります。
+       長く続けたい場合は、追加しておくと安心です。`
+    : `<b>追加のしかた</b><br>
+       ブラウザのメニュー（︙）から「ホーム画面に追加」または「アプリをインストール」を選びます。`;
+}
+
+async function renderStorageState(){
+  const ps = $("#persist-state"), qs = $("#quota-state"), qb = $("#quota-bar");
+  if (!ps) return;
+  try {
+    if (navigator.storage && navigator.storage.persisted){
+      const ok = await navigator.storage.persisted();
+      ps.textContent = ok ? "保護されています" : "保護されていません";
+      $("#persist-note").textContent = ok
+        ? "ブラウザが自動で整理する対象から外れています。"
+        : "端末の空きが少なくなると、ブラウザ側で整理されることがあります。控えを保存しておくと安心です。";
+    } else ps.textContent = "この環境では確認できません";
+  } catch(_){ ps.textContent = "この環境では確認できません"; }
+
+  try {
+    if (navigator.storage && navigator.storage.estimate){
+      const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+      const pct = quota ? Math.min(100, Math.round(usage / quota * 100)) : 0;
+      const mb = n => (n / 1048576).toFixed(n < 10485760 ? 2 : 1) + "MB";
+      qs.textContent = quota ? `${mb(usage)} / ${mb(quota)}` : mb(usage);
+      qb.style.width = Math.max(1, pct) + "%";
+      // 8割を超えたら、静かに控えの保存をすすめる（要件 DR-07）
+      if (pct >= 80 && !Settings.data.quotaHintShownAt){
+        Settings.data.quotaHintShownAt = new Date().toISOString(); Settings.save();
+        toast("そろそろ、記録の控えを保存しておきますか？");
+      }
+    } else qs.textContent = "この環境では確認できません";
+  } catch(_){ qs.textContent = "この環境では確認できません"; }
+}
+
+/* ---------- Service Worker ---------- */
+function registerSW(){
+  if (!("serviceWorker" in navigator)) return;
+  // file:// で開いた場合は登録できない。失敗しても本体の動作には影響させない
+  if (location.protocol === "file:") return;
+  navigator.serviceWorker.register("./sw.js").then(reg => {
+    reg.addEventListener("updatefound", () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener("statechange", () => {
+        if (sw.state === "installed" && navigator.serviceWorker.controller){
+          showUpdateBar(sw);
+        }
+      });
+    });
+  }).catch(()=>{});
+}
+
+function showUpdateBar(sw){
+  if ($("#update-bar")) return;
+  const bar = document.createElement("div");
+  bar.id = "update-bar";
+  bar.innerHTML = `<span class="grow">新しい版があります</span>
+    <button class="chip sm" id="btn-update">更新する</button>`;
+  document.body.appendChild(bar);
+  $("#btn-update").addEventListener("click", () => {
+    sw.postMessage("skipWaiting");
+    navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), { once:true });
+  });
+}
+
+/* ---------- テーマ ---------- */
+function applyTheme(){
+  const t = Settings.data.theme;
+  if (t === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", t);
+}
+function cycleTheme(){
+  const order = ["auto","light","dark"];
+  const cur = order.indexOf(Settings.data.theme);
+  Settings.data.theme = order[(cur+1)%3];
+  Settings.save(); applyTheme();
+  toast({auto:"表示：端末に合わせる", light:"表示：明るい", dark:"表示：暗い"}[Settings.data.theme]);
+}
+
+/* ---------- 起動 ---------- */
+async function boot(){
+  Settings.load();
+  applyTheme();
+  await Store.init();
+  await State.load();
+  await State.closeMonths();
+
+  // ナビ
+  $$(".nav [data-go]").forEach(b => b.addEventListener("click", ()=>go(b.dataset.go)));
+  $("#btn-fab").addEventListener("click", ()=>openTxn());
+  $("#btn-settings").addEventListener("click", ()=>go("settings"));
+  $("#btn-settings-back").addEventListener("click", ()=>go("home"));
+  $("#btn-theme").addEventListener("click", cycleTheme);
+  $("#btn-add-event").addEventListener("click", ()=>openEvent());
+
+  // シート
+  $$("[data-close]").forEach(b => b.addEventListener("click", ()=>{
+    if (b.dataset.close === "sheet-event") delete $("#sheet-event").dataset.ob;
+    closeSheet(b.dataset.close);
+  }));
+  $("#btn-save-txn").addEventListener("click", saveTxn);
+  $("#btn-delete-txn").addEventListener("click", deleteTxn);
+  $("#btn-save-event").addEventListener("click", () => {
+    // 手順の途中では、その場では保存せず一覧へ貯める
+    if ($("#sheet-event").dataset.ob) obCollectEvent(); else saveEvent();
+  });
+  $("#btn-delete-event").addEventListener("click", deleteEvent);
+  // 予定がないときの逃げ道
+  $("#btn-txn-to-saving").addEventListener("click", ()=>{
+    txnType = "saving";
+    $$("#txn-type .chip").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === "saving")));
+    applyTxnType();
+  });
+  $("#btn-txn-new-event").addEventListener("click", ()=>{
+    closeSheet("sheet-txn");
+    setTimeout(()=>openEvent(), 200);
+  });
+  $("#txn-event").addEventListener("change", applyTxnType);
+
+  $$("#txn-type .chip").forEach(c => c.addEventListener("click", ()=>{
+    txnType = c.dataset.type;
+    $$("#txn-type .chip").forEach(x=>x.setAttribute("aria-pressed", String(x===c)));
+    applyTxnType();
+  }));
+  $$("#ev-kind .chip").forEach(c => c.addEventListener("click", ()=>{
+    evKind = c.dataset.kind;
+    $$("#ev-kind .chip").forEach(x=>x.setAttribute("aria-pressed", String(x===c)));
+  }));
+  $("#txn-memo").addEventListener("input", e => {
+    $("#txn-memo-count").textContent = String(e.target.value.length);
+    e.target.style.height = "auto";
+    e.target.style.height = Math.min(e.target.scrollHeight, 150) + "px";
+  });
+
+  // 金額入力は全角も受ける
+  $$('input[inputmode="numeric"]').forEach(inp => {
+    inp.addEventListener("input", () => {
+      const v = toNumeric(inp.value);
+      if (inp.value !== v) inp.value = v;
+      if (inp.id === "ob-income" && $("#ob-alloc")._sync) $("#ob-alloc")._sync();
+      if (inp.id === "set-income" && $("#set-alloc")._sync) $("#set-alloc")._sync();
+    });
+  });
+
+  // オンボーディング
+  $$("[data-ob-next]").forEach(b => b.addEventListener("click", ()=>{
+    if (obStep === 1 && b.classList.contains("quiet")) obAxes = [];
+    if (obStep === 4 && b.classList.contains("quiet")) { obEvents = []; renderObEvents(); }
+    showObStep(Math.min(OB_LAST, obStep+1));
+  }));
+  $("#ob-thismonth").addEventListener("click", e => {
+    const b = e.target.closest("[data-skip]"); if(!b) return;
+    obSkipFirst = b.dataset.skip === "true";
+    $$("#ob-thismonth .chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    $("#ob-thismonth-help").textContent = obSkipFirst
+      ? "今月は枠を足さず、手元にあるお金のなかでやりくりします。来月から枠が始まります。"
+      : "今月の推し活枠を、いつもどおり足します。";
+  });
+  $("#ob-add-event").addEventListener("click", obAddEvent);
+  $("#ob-events").addEventListener("click", e => {
+    const b = e.target.closest("[data-ob-del]"); if(!b) return;
+    obEvents.splice(Number(b.dataset.obDel), 1); renderObEvents();
+  });
+
+  // 予定の初期状態
+  $("#ev-state").addEventListener("click", e => {
+    const b = e.target.closest("[data-state]"); if(!b) return;
+    evState = b.dataset.state; applyEvState();
+  });
+
+  // 「はじめる前のこと」トグル
+  $("#txn-opening-toggle").addEventListener("click", e => {
+    const t = e.currentTarget;
+    t.setAttribute("aria-pressed", String(t.getAttribute("aria-pressed") !== "true"));
+  });
+  $("#ob-axes").addEventListener("click", e => {
+    const b = e.target.closest("[data-ob-axis]"); if(!b) return;
+    const a = b.dataset.obAxis;
+    const on = obAxes.includes(a);
+    if (on) obAxes = obAxes.filter(x=>x!==a); else obAxes.push(a);
+    b.setAttribute("aria-pressed", String(!on));
+  });
+  $("#ob-finish").addEventListener("click", finishOnboarding);
+
+  // 設定
+  $("#set-axes").addEventListener("click", e => {
+    const b = e.target.closest("[data-axis]"); if(!b) return;
+    const a = b.dataset.axis;
+    const s = Settings.data;
+    const on = s.axes.includes(a);
+    s.axes = on ? s.axes.filter(x=>x!==a) : [...s.axes, a];
+    b.setAttribute("aria-pressed", String(!on));
+    Settings.save(); renderHome();
+  });
+  $("#btn-save-settings").addEventListener("click", ()=>{
+    const s = Settings.data;
+    s.income = Number(toNumeric($("#set-income").value)) || 0;
+    s.rates = { ...($("#set-alloc")._rates || s.rates) };
+    Settings.save(); State.recompute(); renderAll();
+    toast("保存しました");
+  });
+  $("#set-wait").addEventListener("click", e => {
+    const b = e.target.closest("[data-wait]"); if(!b) return;
+    Settings.data.wishWaitMinutes = Number(b.dataset.wait);
+    Settings.save(); renderSettings(); renderWish();
+    toast(`${waitLabel(Settings.data.wishWaitMinutes)}にしました`);
+  });
+
+  // ほしいBOX
+  $("#btn-add-wish").addEventListener("click", ()=>openWish());
+  $("#btn-save-wish").addEventListener("click", saveWish);
+  $("#btn-delete-wish").addEventListener("click", deleteWish);
+  $("#wi-url").addEventListener("input", syncWishUrlBtn);
+  $("#btn-wi-open").addEventListener("click", ()=>openUrl($("#wi-url").value));
+  $("#btn-dc-open").addEventListener("click", ()=>{
+    if (decidingWish) openUrl(decidingWish.url);
+  });
+  $("#btn-buy").addEventListener("click", ()=>decideWish(true));
+  $("#btn-pass").addEventListener("click", ()=>decideWish(false));
+  $("#btn-defer").addEventListener("click", deferWish);
+
+  // 推し事貯金
+  $("#oshigoto-btns").addEventListener("click", e => {
+    const b = e.target.closest("[data-oshigoto]"); if(!b) return;
+    addOshigoto(Number(b.dataset.oshigoto));
+  });
+
+  // つぶやき
+  $("#btn-add-note").addEventListener("click", ()=>openNote());
+  $("#btn-save-note").addEventListener("click", saveNote);
+  $("#btn-delete-note").addEventListener("click", deleteNote);
+
+  // ログの絞り込み
+  $("#log-filter").addEventListener("click", e => {
+    const b = e.target.closest("[data-f]"); if(!b) return;
+    logFilter = b.dataset.f;
+    $$("#log-filter .chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    renderLog();
+  });
+  $("#log-list").addEventListener("click", e => {
+    const rv = e.target.closest("[data-review]");
+    if (rv){ e.stopPropagation(); openReview(rv.dataset.review); return; }
+    const y = e.target.closest("[data-year]");
+    if (y){ expandedYears.has(y.dataset.year) ? expandedYears.delete(y.dataset.year)
+                                              : expandedYears.add(y.dataset.year);
+            renderLog(); return; }
+    const m = e.target.closest("[data-month]");
+    if (m){ expandedMonths.has(m.dataset.month) ? expandedMonths.delete(m.dataset.month)
+                                                : expandedMonths.add(m.dataset.month);
+            renderLog(); }
+  });
+  let searchTimer;
+  $("#log-search").addEventListener("input", e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(()=>{ logQuery = e.target.value.trim(); renderLog(); }, 200);
+  });
+
+  // リカバリー
+  $("#rc-options").addEventListener("click", async e => {
+    const b = e.target.closest("[data-rc]"); if(!b) return;
+    const opts = $("#rc-options")._opts || [];
+    closeSheet("sheet-recovery");
+    await opts[Number(b.dataset.rc)].run();
+  });
+
+  $("#btn-save-opening").addEventListener("click", ()=>{
+    const s = Settings.data;
+    const pool = Number(toNumeric($("#set-pool").value)) || 0;
+    const earmarked = State.txns.filter(t => t.opening && t.type === "contribution")
+                                .reduce((a,b) => a + b.amount, 0);
+    if (pool < earmarked){
+      alert(`すでに ${yen(earmarked)} を予定へ取り分けているため、\nそれより少ない金額にはできません。\n\n先に、予定のほうを見直してみてください。`);
+      return;
+    }
+    s.openingOshiPool = pool;
+    s.openingSavings  = Number(toNumeric($("#set-savings").value)) || 0;
+    if (!s.startedYm) s.startedYm = State.currentYm;
+    Settings.save();
+    // 引き継ぎ額を変えたら、開始月のスナップショットを作り直す
+    State.snapshots = State.snapshots.filter(x => x.ym !== s.startedYm);
+    Store.del("snapshots", s.startedYm).catch(()=>{});
+    State.recompute(); renderAll(); renderSettings();
+    toast("保存しました");
+  });
+
+  $("#btn-open-recovery").addEventListener("click", openRecovery);
+
+  // ホーム画面への追加
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault(); installPrompt = e; renderInstall();
+  });
+  window.addEventListener("appinstalled", () => {
+    installPrompt = null; renderInstall(); toast("ホーム画面に追加しました");
+  });
+  $("#btn-install").addEventListener("click", async ()=>{
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice.catch(()=>{});
+    installPrompt = null; renderInstall();
+  });
+
+  // 書き出し・控え
+  $("#btn-backup").addEventListener("click", exportBackup);
+  $("#btn-csv").addEventListener("click", exportCsv);
+  $("#btn-restore").addEventListener("click", ()=>$("#file-restore").click());
+  $("#file-restore").addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    await importBackup(f); e.target.value = "";
+  });
+
+  $("#btn-reset").addEventListener("click", async ()=>{
+    if (!confirm("すべての記録と設定を消して、最初からやり直します。\nよろしいですか？")) return;
+    await Store.clearAll();
+    localStorage.removeItem(LS_SETTINGS);
+    location.reload();
+  });
+
+  // 起動先
+  if (!Settings.data.onboarded){ go("home"); startOnboarding(); }
+  else {
+    go("home");
+    maybeReview();      // 先に先月の振り返り
+    maybeRecovery();
+    maybeBackupHint();
+  }
+  renderInstall();
+  renderStorageState();
+  registerSW();
+
+  // 待ち時間が経過したものを、開いたままでも拾えるように
+  setInterval(()=>{
+    if (State.wishes.some(w => w.status==="waiting" && wishUnlocked(w))){
+      renderWish(); renderHome();
+    }
+  }, 60000);
+}
+
+document.addEventListener("DOMContentLoaded", boot);
+</script>
+</body>
+</html>
