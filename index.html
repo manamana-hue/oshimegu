@@ -377,13 +377,13 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
 
     <div id="axis-line" class="chips" style="margin-bottom:var(--sp-3)"></div>
 
-    <!-- 月に使えるお金が未設定のあいだは、計算が成り立たないことを先に伝える -->
+    <!-- ひと月の収入が未設定のあいだは、計算が成り立たないことを先に伝える -->
     <div class="card" id="setup-card" hidden>
       <p style="margin:0 0 var(--sp-2);font-weight:700">まだ、金額の設定ができていません</p>
       <p class="help" style="margin-top:0">
-        月に使えるお金を決めると、「今、使っていい金額」が出せるようになります。
+        ひと月の収入を入れると、「今、使っていい金額」が出せるようになります。
         記録はいつでも残せますが、残りの計算はまだされません。</p>
-      <button class="btn primary" id="btn-setup-now">月に使えるお金を決める</button>
+      <button class="btn primary" id="btn-setup-now">ひと月の収入を入れる</button>
     </div>
 
     <div class="hero">
@@ -475,10 +475,11 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
     <div class="sec-title">お金の配分</div>
     <div class="card">
       <div class="field" style="margin-bottom:var(--sp-3)">
-        <label for="set-income">月に使えるお金（手取りなど）</label>
+        <label for="set-income">ひと月の収入</label>
         <div class="amount-wrap">
           <input class="input amount" id="set-income" inputmode="numeric" pattern="[0-9]*" placeholder="0">
         </div>
+        <div class="help">お給料・アルバイト代・仕送りなど、ひと月に入ってくるお金。</div>
       </div>
       <div id="set-alloc"></div>
       <button class="btn primary" id="btn-save-settings" style="margin-top:var(--sp-4)">保存する</button>
@@ -589,7 +590,7 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
     </div>
 
     <div class="notice" id="txn-unset" hidden style="margin-bottom:var(--sp-4)">
-      月に使えるお金がまだ決まっていないので、残りの計算はされません。<br>
+      ひと月の収入がまだ決まっていないので、残りの計算はされません。<br>
       記録はこのまま残せます。
     </div>
 
@@ -715,12 +716,12 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
     </div>
 
     <div id="ev-existing">
-      <div class="sec-title" style="margin-top:var(--sp-4)">この予定、もう動いていますか？</div>
+      <div class="sec-title" style="margin-top:var(--sp-4)">この予定のお支払いは、もう済んでいますか？</div>
       <div class="card flat">
         <div class="chips" id="ev-state">
-          <button class="chip sm" data-state="new"    aria-pressed="true">これから貯める</button>
-          <button class="chip sm" data-state="saving" aria-pressed="false">もう一部を用意してある</button>
-          <button class="chip sm" data-state="paid"   aria-pressed="false">支払いは済んでいる</button>
+          <button class="chip sm" data-state="new"    aria-pressed="true">まだこれから</button>
+          <button class="chip sm" data-state="saving" aria-pressed="false">一部だけ用意ずみ</button>
+          <button class="chip sm" data-state="paid"   aria-pressed="false">支払いずみ</button>
         </div>
 
         <div class="field" id="ev-prepared-field" style="margin:var(--sp-4) 0 0" hidden>
@@ -956,14 +957,23 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
 
     <!-- 3 -->
     <div class="ob-step" data-step="2">
-      <h2 class="ob-title">月に使えるお金を<br>分けておきます</h2>
+      <h2 class="ob-title">ひと月の収入を<br>分けておきます</h2>
       <p class="ob-lead">先に分けておくと、推し活の分を罪悪感なく使えます。あとから変えられます。</p>
       <div class="field">
-        <label for="ob-income">月に使えるお金（手取りなど）</label>
+        <label for="ob-income">ひと月の収入</label>
         <div class="amount-wrap">
           <input class="input amount" id="ob-income" inputmode="numeric" pattern="[0-9]*" placeholder="0">
         </div>
-        <div class="help">だいたいで大丈夫です。</div>
+        <div class="help">お給料・アルバイト代・仕送りなど。だいたいで大丈夫です。</div>
+      </div>
+      <div class="field">
+        <label>いまの暮らしに近いのは</label>
+        <div class="chips" id="ob-preset">
+          <button class="chip sm" data-preset="work"   aria-pressed="false">働いている</button>
+          <button class="chip sm" data-preset="home"   aria-pressed="false">学生・実家ぐらし</button>
+          <button class="chip sm" data-preset="alone"  aria-pressed="false">ひとり暮らし</button>
+        </div>
+        <div class="help" id="ob-preset-help">選ぶと、下の割合の目安が入ります。あとから自由に動かせます。</div>
       </div>
       <div id="ob-alloc"></div>
       <div class="ob-foot">
@@ -978,11 +988,12 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
         推し活は今日から始まるわけではありません。すでに貯めてきたお金も、ここから引き継げます。
       </p>
       <div class="field">
-        <label for="ob-pool">推し活のために、今ある金額</label>
+        <label for="ob-pool">推し活のために、すでに取り分けてあるお金</label>
         <div class="amount-wrap">
           <input class="input amount" id="ob-pool" inputmode="numeric" pattern="[0-9]*" placeholder="0">
         </div>
-        <div class="help">専用口座や封筒に分けてある額など。なければ0のままで大丈夫です。</div>
+        <div class="help">専用口座や封筒に分けてある、これまで貯めてきた分。<br>
+          今月の収入は入れなくて大丈夫です（このあと自動で足されます）。なければ0のままでかまいません。</div>
       </div>
       <div class="field">
         <label for="ob-savings">今ある貯金</label>
@@ -990,14 +1001,6 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
           <input class="input amount" id="ob-savings" inputmode="numeric" pattern="[0-9]*" placeholder="0">
         </div>
         <div class="help">推し活とは別の、貯金の残高です。だいたいで大丈夫です。</div>
-      </div>
-      <div class="field">
-        <label>今月の推し活費は</label>
-        <div class="chips" id="ob-thismonth">
-          <button class="chip" data-skip="false" aria-pressed="true">まだこれから</button>
-          <button class="chip" data-skip="true"  aria-pressed="false">もう手元にある</button>
-        </div>
-        <div class="help" id="ob-thismonth-help">今月の推し活枠を、いつもどおり足します。</div>
       </div>
       <div class="ob-foot">
         <button class="btn primary" data-ob-next>次へ</button>
@@ -1169,7 +1172,7 @@ const WAIT_CHOICES = [30, 60, 360, 720, 1440];
 const waitLabel = m => m < 60 ? `${m}分` : `${m / 60}時間`;
 const SCHEMA_VERSION = 2;
 /** 更新できたか目視で確かめるための版数。sw.js の VERSION と揃える */
-const APP_VERSION = "v7";
+const APP_VERSION = "v8";
 const LS_SETTINGS = "oshimegu.settings";
 
 /**
@@ -1780,9 +1783,9 @@ function renderAlloc(sel, rates, getIncome){
       <div class="alloc-amt num" data-a="oshi">¥0</div>
     </div>
     <div class="card flat" style="margin-bottom:0;padding:var(--sp-3)">
-      <div class="alloc-row"><span class="name">生活</span><span class="val" data-v="life">${rates.life}%</span></div>
+      <div class="alloc-row"><span class="name">そのほか</span><span class="val" data-v="life">${rates.life}%</span></div>
       <div class="alloc-amt num" data-a="life">¥0</div>
-      <p class="help" style="margin-top:2px">残りが自動で入ります。</p>
+      <p class="help" style="margin-top:2px">食費・日用品・交際費など、推し活と貯金いがいのぜんぶ。残りが自動で入ります。</p>
     </div>`;
 
   const sync = () => {
@@ -1806,6 +1809,12 @@ function renderAlloc(sel, rates, getIncome){
   };
   host.querySelectorAll('input[type=range]').forEach(r => r.addEventListener("input", sync));
   host._sync = sync;
+  // 外から目安を入れるための入口（暮らしのかたちの選択で使う）
+  host._set = (r) => {
+    host.querySelector('[data-r=save]').value = r.save;
+    host.querySelector('[data-r=oshi]').value = r.oshi;
+    sync();
+  };
   sync();
 }
 
@@ -1892,7 +1901,7 @@ function applyTxnType(){
     $("#txn-saving-note").innerHTML =
       `行き先を決めずに貯めておくお金です。<br>
        ${Settings.data.oshigotoSource === "life"
-         ? "生活費から貯金へまわします。推し活枠は減りません。"
+         ? "「そのほか」の枠から貯金へまわします。推し活枠は減りません。"
          : "貯金として足します。"}`;
   }
 }
@@ -2318,18 +2327,18 @@ function renderOshigoto(){
   }).join("");
   const note = $("#oshigoto-note");
   note.innerHTML = unset
-    ? "月に使えるお金を決めると、ここから貯められるようになります。"
+    ? "ひと月の収入を入れると、ここから貯められるようになります。"
     : (s.oshigotoSource === "life" && left < Math.min(...s.oshigotoAmounts)
-        ? `今月の生活費のぶんは、もう残っていません。来月また貯められます。`
-        : "尊いと思った瞬間に、生活費から少しだけ貯金へ。");
+        ? `今月の「そのほか」の枠は、もう残っていません。来月また貯められます。`
+        : "尊いと思った瞬間に、「そのほか」の枠から少しだけ貯金へ。");
 }
 
 let oshigotoBurst = [];
 async function addOshigoto(amount){
   // 画面側で押せないようにしているが、念のためここでも確かめる
-  if (isUnconfigured()){ toast("先に、月に使えるお金を決めてください"); return; }
+  if (isUnconfigured()){ toast("先に、ひと月の収入を入れてください"); return; }
   if (Settings.data.oshigotoSource === "life" && (State.lifeLeftThisMonth || 0) < amount){
-    toast("今月の生活費のぶんは、もう残っていません"); return;
+    toast("今月の「そのほか」の枠は、もう残っていません"); return;
   }
   // 連打そのものは止めない。短時間に集中したときだけ一度確認する
   const now = Date.now();
@@ -2477,7 +2486,7 @@ function maybeRecovery(){
 
 function openRecovery(){
   if (isUnconfigured()){
-    toast("先に、月に使えるお金を決めてください");
+    toast("先に、ひと月の収入を入れてください");
     go("settings");
     setTimeout(()=>$("#set-income").focus(), 250);
     return;
@@ -2711,9 +2720,21 @@ function obCollectEvent(){
   renderObEvents();
 }
 
+/** 暮らしのかたちごとの、配分のたたき台。あくまで目安で、あとから動かせる */
+const OB_PRESETS = {
+  work:  { rates:{save:20, oshi:30, life:50},
+           note:"家賃や光熱費もここから出ていく想定です。" },
+  home:  { rates:{save:20, oshi:50, life:30},
+           note:"家賃や食費の負担が軽いぶん、推し活に回せる割合を多めにしています。" },
+  alone: { rates:{save:10, oshi:20, life:70},
+           note:"家賃・食費・光熱費が大きいので、暮らしのぶんを厚めにしています。" }
+};
+
 function startOnboarding(){
   obStep = 0; obAxes = []; obRates = {save:20, oshi:30, life:50};
   obSkipFirst = false; obEvents = [];
+  $$("#ob-preset .chip").forEach(x => x.setAttribute("aria-pressed", "false"));
+  $("#ob-preset-help").textContent = "選ぶと、下の割合の目安が入ります。あとから自由に動かせます。";
   renderObEvents();
   $("#ob-axes").innerHTML = AXES.map(a=>`<button class="chip" data-ob-axis="${esc(a)}" aria-pressed="false">${esc(a)}</button>`).join("");
   renderAlloc("#ob-alloc", obRates, () => Number(toNumeric($("#ob-income").value)) || 0);
@@ -3081,13 +3102,12 @@ async function boot(){
     if (obStep === 4 && b.classList.contains("quiet")) { obEvents = []; renderObEvents(); }
     showObStep(Math.min(OB_LAST, obStep+1));
   }));
-  $("#ob-thismonth").addEventListener("click", e => {
-    const b = e.target.closest("[data-skip]"); if(!b) return;
-    obSkipFirst = b.dataset.skip === "true";
-    $$("#ob-thismonth .chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-    $("#ob-thismonth-help").textContent = obSkipFirst
-      ? "今月は枠を足さず、手元にあるお金のなかでやりくりします。来月から枠が始まります。"
-      : "今月の推し活枠を、いつもどおり足します。";
+  $("#ob-preset").addEventListener("click", e => {
+    const b = e.target.closest("[data-preset]"); if(!b) return;
+    const p = OB_PRESETS[b.dataset.preset];
+    $$("#ob-preset .chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    $("#ob-preset-help").textContent = p.note;
+    if ($("#ob-alloc")._set) $("#ob-alloc")._set(p.rates);
   });
   $("#ob-add-event").addEventListener("click", obAddEvent);
   $("#ob-events").addEventListener("click", e => {
