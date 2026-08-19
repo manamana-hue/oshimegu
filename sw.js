@@ -4,7 +4,7 @@
      2. ホーム画面に追加できる状態を成立させること（NFR-06/07）
    記録データはIndexedDBにあり、ここでは一切さわらない。 */
 
-const VERSION = "oshimegu-v3";
+const VERSION = "oshimegu-v4";   // 本体を更新したら、ここの数字を上げる
 const ASSETS = [
   "./",
   "./index.html",

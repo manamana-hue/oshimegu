@@ -183,6 +183,7 @@ button{cursor:pointer; background:none; border:none; padding:0;}
   color:var(--c-primary-deep); font-weight:700;}
 /* 小さめのチップも、指で押す当たり判定は他と同じだけ確保する */
 .chip.sm{min-height:var(--tap); padding:6px 14px; font-size:13px;}
+.chip[disabled]{opacity:.4; pointer-events:none;}
 .axis-chip{background:var(--c-primary-weak); color:var(--c-primary-deep); border:none;
   border-radius:99px; padding:3px 10px; font-size:12px; font-weight:600;}
 
@@ -376,6 +377,15 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
 
     <div id="axis-line" class="chips" style="margin-bottom:var(--sp-3)"></div>
 
+    <!-- 月に使えるお金が未設定のあいだは、計算が成り立たないことを先に伝える -->
+    <div class="card" id="setup-card" hidden>
+      <p style="margin:0 0 var(--sp-2);font-weight:700">まだ、金額の設定ができていません</p>
+      <p class="help" style="margin-top:0">
+        月に使えるお金を決めると、「今、使っていい金額」が出せるようになります。
+        記録はいつでも残せますが、残りの計算はまだされません。</p>
+      <button class="btn primary" id="btn-setup-now">月に使えるお金を決める</button>
+    </div>
+
     <div class="hero">
       <div class="label">今、使っていい金額</div>
       <div class="amount num" id="hero-amount">¥0</div>
@@ -401,6 +411,7 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
         <span class="tiny">今ある貯金</span>
         <b class="num" id="savings-now" style="font-size:15px">¥0</b>
       </div>
+      <p class="help" id="pool-short" hidden style="margin:var(--sp-2) 0 0"></p>
     </div>
 
     <div class="card" id="oshigoto-card">
@@ -409,7 +420,7 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
         <span class="tiny num">これまで <b id="oshigoto-total">¥0</b></span>
       </div>
       <div class="chips" id="oshigoto-btns"></div>
-      <p class="help" style="margin-bottom:0">尊いと思った瞬間に、生活費から少しだけ貯金へ。</p>
+      <p class="help" id="oshigoto-note" style="margin-bottom:0"></p>
     </div>
 
     <div class="sec-title">守っている未来</div>
@@ -571,6 +582,11 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
       <button class="iconbtn" data-close="sheet-txn" aria-label="戻る">‹</button>
       <h2 id="txn-title">記録する</h2>
       <span class="spacer" aria-hidden="true"></span>
+    </div>
+
+    <div class="notice" id="txn-unset" hidden style="margin-bottom:var(--sp-4)">
+      月に使えるお金がまだ決まっていないので、残りの計算はされません。<br>
+      記録はこのまま残せます。
     </div>
 
     <div class="chips" style="margin-bottom:var(--sp-4)" id="txn-type">
@@ -1438,8 +1454,13 @@ function go(name){
 
 function renderAll(){ renderHome(); renderEvents(); renderLog(); renderWish(); }
 
+/** 月に使えるお金が決まっていない＝計算が成り立たない状態 */
+function isUnconfigured(){ return !(Settings.data.income > 0); }
+
 function renderHome(){
   const s = Settings.data, c = State.calc, b = State.budgets;
+  const unset = isUnconfigured();
+  $("#setup-card").hidden = !unset;
 
   // 軸
   const ax = $("#axis-line");
@@ -1450,9 +1471,9 @@ function renderHome(){
   // ヒーロー
   $("#hero-amount").textContent = yen(c.spendable);
   const note = $("#hero-note");
-  if (s.income === 0){
+  if (unset){
     $("#hero-amount").textContent = "—";
-    note.innerHTML = `設定から、月に使えるお金を入れると計算できます。`;
+    note.innerHTML = `上の設定がすむと、ここに金額が出ます。`;
   } else if (c.isBehind){
     note.innerHTML = `予定より少し先に使っている状態です。<br>
       ここから整えていけば大丈夫です。`;
@@ -1472,8 +1493,14 @@ function renderHome(){
   $("#budget-bar").style.width = pct + "%";
   $("#budget-left").textContent  = yen(left);
   $("#budget-total").textContent = yen(total);
-  $("#pool-now").textContent     = yen(State.oshiPoolNow);
+  // マイナスは大きく出さない。不足していることは、下に小さく言葉で添える（設計原則5）
+  $("#pool-now").textContent     = yen(Math.max(0, State.oshiPoolNow));
   $("#savings-now").textContent  = yen(State.savingsNow);
+  const short = $("#pool-short");
+  if (State.oshiPoolNow < 0){
+    short.hidden = false;
+    short.textContent = `予定に取り分けている分から ${yen(-State.oshiPoolNow)} を先に使っています。`;
+  } else short.hidden = true;
 
   // 予定
   const evs = State.events
@@ -1816,6 +1843,7 @@ function openTxn(id){
   $("#txn-amount-err").hidden = true;
   $("#txn-opening-toggle").setAttribute("aria-pressed",
     String(!!(editingTxn && editingTxn.opening)));
+  $("#txn-unset").hidden = !isUnconfigured();
   applyTxnType();
   openSheet("sheet-txn");
   if (!editingTxn) setTimeout(()=>$("#txn-amount").focus(), 250);
@@ -2271,13 +2299,30 @@ async function decideWish(bought){
 /* ---------- 推し事貯金 ---------- */
 function renderOshigoto(){
   const s = Settings.data;
+  const unset = isUnconfigured();
+  const left = State.lifeLeftThisMonth || 0;
   $("#oshigoto-total").textContent = yen(State.oshigotoTotal || 0);
-  $("#oshigoto-btns").innerHTML = s.oshigotoAmounts.map(a =>
-    `<button class="chip" data-oshigoto="${a}">尊い…… +${a.toLocaleString("ja-JP")}円</button>`).join("");
+  // 原資（生活費）がない状態で押せてしまうと、どこからも出ていないお金が生まれる
+  $("#oshigoto-btns").innerHTML = s.oshigotoAmounts.map(a => {
+    const ok = !unset && (s.oshigotoSource !== "life" || left >= a);
+    return `<button class="chip" data-oshigoto="${a}"${ok ? "" : " disabled"}>` +
+           `尊い…… +${a.toLocaleString("ja-JP")}円</button>`;
+  }).join("");
+  const note = $("#oshigoto-note");
+  note.innerHTML = unset
+    ? "月に使えるお金を決めると、ここから貯められるようになります。"
+    : (s.oshigotoSource === "life" && left < Math.min(...s.oshigotoAmounts)
+        ? `今月の生活費のぶんは、もう残っていません。来月また貯められます。`
+        : "尊いと思った瞬間に、生活費から少しだけ貯金へ。");
 }
 
 let oshigotoBurst = [];
 async function addOshigoto(amount){
+  // 画面側で押せないようにしているが、念のためここでも確かめる
+  if (isUnconfigured()){ toast("先に、月に使えるお金を決めてください"); return; }
+  if (Settings.data.oshigotoSource === "life" && (State.lifeLeftThisMonth || 0) < amount){
+    toast("今月の生活費のぶんは、もう残っていません"); return;
+  }
   // 連打そのものは止めない。短時間に集中したときだけ一度確認する
   const now = Date.now();
   oshigotoBurst = oshigotoBurst.filter(t => now - t < 60000);
@@ -2414,6 +2459,8 @@ function maybeReview(){
 /* ---------- リカバリー ---------- */
 function maybeRecovery(){
   const s = Settings.data;
+  // 枠が決まっていないうちは、立て直しの話にならない。設定の案内が先
+  if (isUnconfigured()) return;
   if (!State.calc.isBehind) return;
   if (s.recoveryShownFor === State.currentYm) return;   // 同じ状態では一度だけ
   s.recoveryShownFor = State.currentYm; Settings.save();
@@ -2421,6 +2468,12 @@ function maybeRecovery(){
 }
 
 function openRecovery(){
+  if (isUnconfigured()){
+    toast("先に、月に使えるお金を決めてください");
+    go("settings");
+    setTimeout(()=>$("#set-income").focus(), 250);
+    return;
+  }
   const short = Math.abs(State.calc.rawSpendable);
   $("#rc-body").innerHTML = State.calc.isBehind
     ? `いま、未来の予定に取り分けている分から ${yen(short)} を先に使っている状態です。`
@@ -2887,6 +2940,10 @@ async function boot(){
   $$(".nav [data-go]").forEach(b => b.addEventListener("click", ()=>go(b.dataset.go)));
   $("#btn-fab").addEventListener("click", ()=>openTxn());
   $("#btn-settings").addEventListener("click", ()=>go("settings"));
+  $("#btn-setup-now").addEventListener("click", ()=>{
+    go("settings");
+    setTimeout(()=>{ $("#set-income").focus(); $("#set-income").scrollIntoView({block:"center"}); }, 250);
+  });
   $("#btn-settings-back").addEventListener("click", ()=>go("home"));
   $("#btn-theme").addEventListener("click", cycleTheme);
   $("#btn-add-event").addEventListener("click", ()=>openEvent());
