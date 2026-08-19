@@ -546,6 +546,10 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
       </div>
       <p class="help" id="persist-note" style="margin:4px 0 0"></p>
       <div class="row between" style="margin-top:var(--sp-3)">
+        <span class="tiny" style="flex:none">オフライン対応</span>
+        <b class="tiny" id="sw-state" style="text-align:right">確認中…</b>
+      </div>
+      <div class="row between" style="margin-top:6px">
         <span class="tiny" style="flex:none">使っている容量</span>
         <b class="tiny num" id="quota-state">確認中…</b>
       </div>
@@ -1165,7 +1169,7 @@ const WAIT_CHOICES = [30, 60, 360, 720, 1440];
 const waitLabel = m => m < 60 ? `${m}分` : `${m / 60}時間`;
 const SCHEMA_VERSION = 2;
 /** 更新できたか目視で確かめるための版数。sw.js の VERSION と揃える */
-const APP_VERSION = "v6";
+const APP_VERSION = "v7";
 const LS_SETTINGS = "oshimegu.settings";
 
 /**
@@ -2858,9 +2862,37 @@ function renderInstall(){
        ブラウザのメニュー（︙）から「ホーム画面に追加」または「アプリをインストール」を選びます。`;
 }
 
+/**
+ * Service Worker がちゃんと中身のあるファイルとして動いているか確かめる。
+ * 空のファイルを上げてしまっても登録自体は成功してしまい、
+ * オフライン対応が静かに死ぬので、設定画面で分かるようにする。
+ */
+function pingServiceWorker(timeout = 1500){
+  return new Promise(resolve => {
+    const sw = navigator.serviceWorker && navigator.serviceWorker.controller;
+    if (!sw) return resolve(null);
+    const ch = new MessageChannel();
+    const t = setTimeout(() => resolve(false), timeout);
+    ch.port1.onmessage = e => { clearTimeout(t); resolve(e.data || false); };
+    try { sw.postMessage("ping", [ch.port2]); } catch(_){ clearTimeout(t); resolve(false); }
+  });
+}
+
 async function renderStorageState(){
   const ps = $("#persist-state"), qs = $("#quota-state"), qb = $("#quota-bar");
   if (!ps) return;
+
+  const sw = $("#sw-state");
+  if (sw){
+    if (location.protocol === "file:") sw.textContent = "この開き方では使えません";
+    else if (!("serviceWorker" in navigator)) sw.textContent = "この環境では使えません";
+    else {
+      const v = await pingServiceWorker();
+      sw.textContent = v ? `動いています（${v}）`
+        : (v === null ? "まだ有効になっていません（開き直すと有効になります）"
+                      : "応答がありません。sw.js を確かめてください");
+    }
+  }
   try {
     if (navigator.storage && navigator.storage.persisted){
       const ok = await navigator.storage.persisted();
@@ -2892,7 +2924,8 @@ function registerSW(){
   if (!("serviceWorker" in navigator)) return;
   // file:// で開いた場合は登録できない。失敗しても本体の動作には影響させない
   if (location.protocol === "file:") return;
-  navigator.serviceWorker.register("./sw.js").then(reg => {
+  // 版数をURLに載せて登録する。これで sw.js 自体は差し替え不要になる
+  navigator.serviceWorker.register("./sw.js?v=" + APP_VERSION).then(reg => {
     // 前回の訪問で用意された新版が、すでに控えていることがある
     if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
 

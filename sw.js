@@ -4,7 +4,10 @@
      2. ホーム画面に追加できる状態を成立させること（NFR-06/07）
    記録データはIndexedDBにあり、ここでは一切さわらない。 */
 
-const VERSION = "oshimegu-v6";   // 本体を更新したら、ここの数字を上げる
+/* 版数は index.html 側が登録URLのクエリ（?v=…）で渡す。
+   こうしておくと、本体を更新してもこのファイルは差し替えなくてよい。 */
+const VERSION = "oshimegu-" +
+  (new URLSearchParams(self.location.search).get("v") || "0");
 const ASSETS = [
   "./",
   "./index.html",
@@ -39,6 +42,8 @@ self.addEventListener("activate", e => {
 /** 更新を待たずに新しい版へ切り替える（利用者が「更新する」を押したとき） */
 self.addEventListener("message", e => {
   if (e.data === "skipWaiting") self.skipWaiting();
+  // 本体から「生きているか」を確かめるための返事
+  if (e.data === "ping" && e.ports && e.ports[0]) e.ports[0].postMessage(VERSION);
 });
 
 self.addEventListener("fetch", e => {
