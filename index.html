@@ -555,7 +555,7 @@ input[type=range]{width:100%; height:var(--tap); accent-color:var(--c-primary);
 
     <div class="sec-title">この試作版について</div>
     <div class="card flat">
-      <p class="tiny" style="margin:0 0 var(--sp-2)">おしめぐ プロトタイプ 段階3</p>
+      <p class="tiny" style="margin:0 0 var(--sp-2)">おしめぐ プロトタイプ <b id="app-version">—</b></p>
       <p class="tiny" style="margin:0">実装済み：先取り予算 ／ 未来の予定 ／ 支出の記録 ／ 今使っていい金額 ／
       ほしいBOX ／ 推し事貯金 ／ 推し活ログ ／ 立て直しの提案 ／ 書き出しと控えの保存 ／
       使いはじめる前からの引き継ぎ ／ ホーム画面への追加とオフライン動作 ／ 月末の振り返り<br>
@@ -1164,6 +1164,8 @@ const AXES = ["ライブ・現場重視","グッズ厳選","配信重視","遠�
 const WAIT_CHOICES = [30, 60, 360, 720, 1440];
 const waitLabel = m => m < 60 ? `${m}分` : `${m / 60}時間`;
 const SCHEMA_VERSION = 2;
+/** 更新できたか目視で確かめるための版数。sw.js の VERSION と揃える */
+const APP_VERSION = "v5";
 const LS_SETTINGS = "oshimegu.settings";
 
 /**
@@ -1749,6 +1751,8 @@ function renderSettings(){
   $("#set-opening-note").textContent = earmarked
     ? `このうち ${yen(earmarked)} は、すでに予定へ取り分けています。`
     : "";
+  const ver = $("#app-version");
+  if (ver) ver.textContent = APP_VERSION + (Platform.isStandalone ? "（ホーム画面から）" : "");
   renderBackupStatus();
   renderInstall();
   renderStorageState();
@@ -2889,6 +2893,9 @@ function registerSW(){
   // file:// で開いた場合は登録できない。失敗しても本体の動作には影響させない
   if (location.protocol === "file:") return;
   navigator.serviceWorker.register("./sw.js").then(reg => {
+    // 前回の訪問で用意された新版が、すでに控えていることがある
+    if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
+
     reg.addEventListener("updatefound", () => {
       const sw = reg.installing;
       if (!sw) return;
@@ -2897,6 +2904,13 @@ function registerSW(){
           showUpdateBar(sw);
         }
       });
+    });
+
+    // 開いたときに、新しい版が出ていないか自分から確かめる
+    reg.update().catch(()=>{});
+    // ホーム画面から開き直したときにも確かめる
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) reg.update().catch(()=>{});
     });
   }).catch(()=>{});
 }
